@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang=fr><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>ADMIN ART ZEDMO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#070d1a;color:#e6edf3;padding:10px}
+h1{color:#f5c518;font-size:18px;margin-bottom:10px}
+.topbar{display:flex;gap:8px;align-items:center;margin:10px 0;flex-wrap:wrap}
+.badge{background:#111d2e;border:1px solid #1e3450;padding:8px 12px;border-radius:10px;font-size:13px}
+.btnTop{padding:8px 12px;border:none;border-radius:10px;font-weight:800;cursor:pointer}
+.green{background:#00d68f;color:#000}
+.tableWrap{overflow:auto;border-radius:12px;border:1px solid #1e3450;background:#0c1628}
+table{width:100%;border-collapse:collapse;min-width:800px;font-size:12px}
+th{background:#111d2e;color:#8ba0bf;padding:10px 6px;text-align:left;position:sticky;top:0}
+td{padding:8px 6px;border-top:1px solid #13223a;vertical-align:top}
+.addr{color:#00ff9d;font-size:10px;word-break:break-all;display:block;max-width:160px}
+.send{color:#000;background:#f5c518;padding:4px 8px;border-radius:8px;font-weight:900;display:inline-block;margin-top:4px;font-size:13px}
+.act{color:#ff9d00}
+.ok{color:#00ff9d}
+.btn{padding:6px 10px;border:none;border-radius:8px;font-weight:800;font-size:11px;cursor:pointer;width:70px;margin:2px 0;display:block}
+.btn-v{background:#00ff9d;color:#000}
+.btn-r{background:#ff3b3b;color:#fff}
+</style></head><body>
+<h1>👑 ADMIN ART ZEDMO</h1>
+<div class=topbar>
+<div class=badge id=count>0 transactions</div>
+<button class=btnTop onclick="load()" style="background:#1e3450;color:#fff">Actualiser</button>
+<a href="/"><button class=btnTop green style="background:#00d68f;color:#000">Retour App</button></a>
+</div>
+
+<div class=tableWrap>
+<table><thead><tr>
+<th>ID</th><th>Type</th><th>Pays/Op</th><th>Montant Payé</th><th>À ENVOYER ➡️</th><th>Client (Tel/Adresse)</th><th>Status</th><th>Action</th>
+</tr></thead><tbody id=tbody></tbody></table>
+</div>
+
+<script>
+function formatToSend(tx){
+  // Si Mobile->Crypto : à envoyer = USDT
+  if((tx.type||'').includes('Mobile')){
+    let fcfa = tx.amount || tx.payFCFA || 0;
+    // calcule si pas stocké : 1000 FCFA = 1.65 USDT
+    let usdt = tx.receiveAmount || tx.cryptoAmount || tx.usdt || (parseFloat(fcfa)*0.00165).toFixed(2);
+    let crypto = tx.crypto || 'USDT_TRC20';
+    return `<span class=send>${usdt} ${crypto}</span><br><small style="color:#8ba0bf">${fcfa} FCFA → ${usdt}</small>`;
+  } else {
+    // Crypto->Mobile : à envoyer = FCFA
+    let fcfa = tx.receiveFCFA || tx.fcfaToSend || tx.amountFCFA || '---';
+    let crypto = tx.cryptoAmount || tx.amount || '---';
+    return `<span class=send>${fcfa} FCFA</span><br><small style="color:#8ba0bf">${crypto} ${tx.crypto||''}</small>`;
+  }
+}
+
+async function load(){
+  let r = await fetch('/api/admin/transactions');
+  let data = await r.json();
+  document.getElementById('count').innerText = data.length+' transactions | En attente: '+data.filter(t=>t.status.includes('attente')).length;
+  let tbody='';
+  data.slice().reverse().forEach(tx=>{
+    let id = (tx.id+'').slice(-6);
+    let isVal = tx.status.includes('Valid');
+    tbody+=`<tr>
+      <td><b>${id}</b></td>
+      <td>${tx.type||'Mobile<br>>Crypto'}</td>
+      <td>${tx.country||''}/${tx.operator||tx.operateur||''}<br><small>${tx.pays||''}</small></td>
+      <td><b>${tx.amount||tx.payFCFA||''} FCFA</b><br><small>${tx.crypto||'USDT_TRC20'}</small></td>
+      <td>${formatToSend(tx)}</td>
+      <td><b style="color:#00ff9d">${tx.phonePay||tx.phoneRec||tx.tel||''}</b><span class=addr>${tx.address||tx.depositTo||tx.cryptoAddress||''}</span></td>
+      <td class="${isVal?'ok':'act'}">${tx.status}</td>
+      <td>${isVal?'<span class=ok>✅ Validé</span>':`<button class="btn btn-v" onclick="doVal('${tx.id}','Validé - Payé')">Valider</button><button class="btn btn-r" onclick="doVal('${tx.id}','Refusé')">Rejeter</button>`}</td>
+    </tr>`;
+  });
+  document.getElementById('tbody').innerHTML = tbody||'<tr><td colspan=8>Aucune</td></tr>';
+}
+
+async function doVal(id,status){
+  if(!confirm(status+' ID '+id+' ?\nVérifie bien le montant à envoyer!')) return;
+  let res = await fetch('/api/admin/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status})});
+  let j = await res.json();
+  console.log(j);
+  alert('✅ '+status+' effectué');
+  load();
+}
+load();
+setInterval(load,5000);
+</script>
+<script src="/fix-histo.js"></script></body></html>
