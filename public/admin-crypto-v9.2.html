@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>ADMIN CRYPTO v9.2</title>
+<style>body{font-family:Arial;background:#111;color:#fff;padding:20px}.box{background:#222;padding:15px;border-radius:10px;margin-bottom:15px} button{padding:8px 15px;border-radius:6px;border:none;cursor:pointer;font-weight:bold}.valide{background:#00ff88}.attente{background:orange}</style>
+</head><body>
+<h1>🔐 ADMIN CRYPTO v9.2 - TOUNKA ZAKARI</h1>
+<div class="box"><h3>Prix Auto (Option B)</h3><div id="prix-admin">Chargement...</div>
+<label>Marge: </label><input type="number" id="marge" value="2" style="width:60px">% <button onclick="majMarge()">Changer</button>
+<p>MTN: 0196587303 | Moov: 0194655238 | Nom: TOUNKA ZAKARI Moussiliou</p></div>
+
+<div class="box"><h3>Commandes en attente (à valider après avoir reçu MoMo)</h3><div id="liste"></div><button onclick="charger()">Actualiser</button></div>
+
+<script src="crypto-prices-auto.js"></script>
+<script>
+let prix={};
+async function loadPrix(){ prix=await getPrixZedmo(); document.getElementById('prix-admin').innerHTML=`Taux XOF: ${prix.taux} | BEP20 Vente: ${prix.BEP20} | TRC20: ${prix.TRC20} | ERC20: ${prix.ERC20} | Achat: ${prix.achat}`; } loadPrix();
+
+async function charger(){
+  const res = await fetch('/api/admin/transactions');
+  const all = await res.json();
+  const cryptos = all.filter(t=>t.type==='BUY_CRYPTO');
+  let html=''; cryptos.reverse().forEach(t=>{
+    html+=`<div style="background:#111;padding:10px;margin:5px 0;border-radius:8px;">
+    <b>${t.phonePay}</b> - ${t.amountFCFA} FCFA -> ${t.usdtAmount} USDT ${t.network} - <span style="color:${t.status==='VALIDE'?'#0f0':'orange'}">${t.status}</span> - ${t.date}
+    ${t.status!=='VALIDE'?`<button class="valide" onclick="valider('${t.phonePay}','${t.date}')">VALIDER (créditer wallet)</button>`:''}
+    </div>`;
+  });
+  document.getElementById('liste').innerHTML = html || 'Aucune commande crypto';
+} charger();
+
+async function valider(phone,date){
+  if(!confirm('Tu as bien reçu le MoMo de '+phone+'?')) return;
+  await fetch('/api/admin/validate', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({phone,date})});
+  alert('Client crédité! Son solde Option 2 a augmenté.');
+  charger();
+}
+function majMarge(){ ZEDMO_CRYPTO.marge=parseFloat(document.getElementById('marge').value)/100; loadPrix(); alert('Marge mise à jour, nouveau prix calculé'); }
+setInterval(charger,10000);
+</script>
+</body></html>
