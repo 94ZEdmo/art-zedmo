@@ -1,31 +1,37 @@
-<!DOCTYPE html><html lang=fr><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>ADMIN ART ZEDMO</title>
+<!DOCTYPE html><html lang=fr><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>ADMIN ART ZEDMO PRO</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
 body{background:#070d1a;color:#e6edf3;padding:10px}
 h1{color:#f5c518;font-size:18px;margin-bottom:10px}
+h2{color:#00ff9d;font-size:14px;margin:14px 0 6px}
 .topbar{display:flex;gap:8px;align-items:center;margin:10px 0;flex-wrap:wrap}
 .badge{background:#111d2e;border:1px solid #1e3450;padding:8px 12px;border-radius:10px;font-size:13px}
 .btnTop{padding:8px 12px;border:none;border-radius:10px;font-weight:800;cursor:pointer}
-.green{background:#00d68f;color:#000}
-.tableWrap{overflow:auto;border-radius:12px;border:1px solid #1e3450;background:#0c1628}
+.tableWrap{overflow:auto;border-radius:12px;border:1px solid #1e3450;background:#0c1628;margin-bottom:12px}
 table{width:100%;border-collapse:collapse;min-width:800px;font-size:12px}
 th{background:#111d2e;color:#8ba0bf;padding:10px 6px;text-align:left;position:sticky;top:0}
 td{padding:8px 6px;border-top:1px solid #13223a;vertical-align:top}
 .addr{color:#00ff9d;font-size:10px;word-break:break-all;display:block;max-width:160px}
 .send{color:#000;background:#f5c518;padding:4px 8px;border-radius:8px;font-weight:900;display:inline-block;margin-top:4px;font-size:13px}
-.act{color:#ff9d00}
-.ok{color:#00ff9d}
+.act{color:#ff9d00}.ok{color:#00ff9d}
 .btn{padding:6px 10px;border:none;border-radius:8px;font-weight:800;font-size:11px;cursor:pointer;width:70px;margin:2px 0;display:block}
-.btn-v{background:#00ff9d;color:#000}
-.btn-r{background:#ff3b3b;color:#fff}
+.btn-v{background:#00ff9d;color:#000}.btn-r{background:#ff3b3b;color:#fff}
 </style></head><body>
-<h1>👑 ADMIN ART ZEDMO</h1>
+<h1>👑 ADMIN ART ZEDMO PRO</h1>
 <div class=topbar>
 <div class=badge id=count>0 transactions</div>
+<div class=badge id=usersCount style="border-color:#00ff9d;color:#00ff9d">0 clients</div>
+<div class=badge id=totalBusiness style="border-color:#f5c518;color:#f5c518">Volume: 0 FCFA</div>
 <button class=btnTop onclick="load()" style="background:#1e3450;color:#fff">Actualiser</button>
-<a href="/"><button class=btnTop green style="background:#00d68f;color:#000">Retour App</button></a>
+<a href="/"><button class=btnTop style="background:#00d68f;color:#000">Retour App</button></a>
 </div>
 
+<h2>👥 CLIENTS INSCRITS (Solde Perso)</h2>
+<div class=tableWrap>
+<table><thead><tr><th>Nom</th><th>Telephone</th><th>Nb Tx</th><th>Solde Perso Estimé</th><th>Dernier Tx</th></tr></thead><tbody id=tbodyUsers></tbody></table>
+</div>
+
+<h2>💸 TRANSACTIONS EN ATTENTE</h2>
 <div class=tableWrap>
 <table><thead><tr>
 <th>ID</th><th>Type</th><th>Pays/Op</th><th>Montant Payé</th><th>À ENVOYER ➡️</th><th>Client (Tel/Adresse)</th><th>Status</th><th>Action</th>
@@ -33,37 +39,80 @@ td{padding:8px 6px;border-top:1px solid #13223a;vertical-align:top}
 </div>
 
 <script>
+let RATES_LIVE={USDT_TRC20:605,BTC:50000000,ETH:2000000,BNB:450000};
+async function loadRates(){
+ try{
+  let [bnb,btc,eth,fx]=await Promise.all([
+   fetch('https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT').then(r=>r.json()),
+   fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(r=>r.json()),
+   fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT').then(r=>r.json()),
+   fetch('https://api.exchangerate-api.com/v4/latest/USD').then(r=>r.json())
+  ]);
+  let xof=fx.rates.XOF||573.24;
+  RATES_LIVE.BNB=Math.round(parseFloat(bnb.price)*xof);
+  RATES_LIVE.BTC=Math.round(parseFloat(btc.price)*xof);
+  RATES_LIVE.ETH=Math.round(parseFloat(eth.price)*xof);
+  RATES_LIVE.USDT_TRC20=Math.round(xof);
+ }catch(e){}
+}
+
 function formatToSend(tx){
-  // Si Mobile->Crypto : à envoyer = USDT
   if((tx.type||'').includes('Mobile')){
-    let fcfa = tx.amount || tx.payFCFA || 0;
-    // calcule si pas stocké : 1000 FCFA = 1.65 USDT
-    let usdt = tx.receiveAmount || tx.cryptoAmount || tx.usdt || (parseFloat(fcfa)*0.00165).toFixed(2);
+    let fcfa = tx.amount || 0;
+    let usdt = (parseFloat(fcfa)/RATES_LIVE.USDT_TRC20).toFixed(2);
     let crypto = tx.crypto || 'USDT_TRC20';
-    return `<span class=send>${usdt} ${crypto}</span><br><small style="color:#8ba0bf">${fcfa} FCFA → ${usdt}</small>`;
+    return `<span class=send>${usdt} ${crypto}</span><br><small>${fcfa} FCFA → LIVE</small>`;
   } else {
-    // Crypto->Mobile : à envoyer = FCFA
-    let fcfa = tx.receiveFCFA || tx.fcfaToSend || tx.amountFCFA || '---';
-    let crypto = tx.cryptoAmount || tx.amount || '---';
-    return `<span class=send>${fcfa} FCFA</span><br><small style="color:#8ba0bf">${crypto} ${tx.crypto||''}</small>`;
+    let amount = parseFloat(tx.cryptoAmount||tx.amount||0);
+    let rate = RATES_LIVE[tx.crypto]||RATES_LIVE.USDT_TRC20;
+    let fcfaNet = Math.round(amount*rate*0.98);
+    return `<span class=send>${fcfaNet.toLocaleString()} FCFA</span><br><small>${amount} ${tx.crypto||''} LIVE</small>`;
   }
 }
 
 async function load(){
+  await loadRates();
   let r = await fetch('/api/admin/transactions');
   let data = await r.json();
-  document.getElementById('count').innerText = data.length+' transactions | En attente: '+data.filter(t=>t.status.includes('attente')).length;
+
+  // === STATS BUSINESS ===
+  let totalVol = data.reduce((s,tx)=> s + (parseFloat(tx.amount)||0) + (parseFloat(tx.cryptoAmount||0)* (RATES_LIVE[tx.crypto]||0)),0);
+  document.getElementById('count').innerText = data.length+' tx | Attente: '+data.filter(t=>(t.status||'').includes('attente')).length;
+  document.getElementById('totalBusiness').innerText='Volume: '+Math.round(totalVol).toLocaleString()+' FCFA';
+
+  // === TABLE CLIENTS (agrégé depuis tx.user) ===
+  let usersMap={};
+  data.forEach(tx=>{
+    let u=tx.user||{phone:tx.phonePay||tx.phoneRec||'Inconnu', name:tx.userName||'Client'};
+    let phone=u.phone||tx.phonePay||tx.phoneRec||'Inconnu';
+    if(phone==='Inconnu') return;
+    if(!usersMap[phone]) usersMap[phone]={name:u.name||'Client', phone:phone, count:0, last:tx.id, vol:0};
+    usersMap[phone].count++;
+    usersMap[phone].vol+= parseFloat(tx.amount)||0;
+    usersMap[phone].last=tx.id;
+  });
+  let usersArr=Object.values(usersMap);
+  document.getElementById('usersCount').innerText=usersArr.length+' clients';
+  let hU='';
+  usersArr.reverse().forEach(u=>{
+    hU+=`<tr><td><b>${u.name}</b></td><td style="color:#00ff9d">${u.phone}</td><td>${u.count} tx</td><td>${u.vol.toLocaleString()} FCFA déposé</td><td><small>${String(u.last).slice(-6)}</small></td></tr>`;
+  });
+  document.getElementById('tbodyUsers').innerHTML=hU||'<tr><td colspan=5>Aucun client encore (les clients doivent faire 1 tx pour apparaître, ou on branche le backend users)</td></tr>';
+
+  // === TABLE TRANSACTIONS ===
   let tbody='';
   data.slice().reverse().forEach(tx=>{
     let id = (tx.id+'').slice(-6);
-    let isVal = tx.status.includes('Valid');
+    let isVal = (tx.status||'').includes('Valid');
+    let phone = tx.user?.phone || tx.phonePay || tx.phoneRec || '';
+    let name = tx.user?.name || '';
     tbody+=`<tr>
       <td><b>${id}</b></td>
-      <td>${tx.type||'Mobile<br>>Crypto'}</td>
-      <td>${tx.country||''}/${tx.operator||tx.operateur||''}<br><small>${tx.pays||''}</small></td>
-      <td><b>${tx.amount||tx.payFCFA||''} FCFA</b><br><small>${tx.crypto||'USDT_TRC20'}</small></td>
+      <td>${tx.type||''}<br><small style="color:#8ba0bf">${name}</small></td>
+      <td>${tx.country||''}/${tx.operator||''}</td>
+      <td><b>${tx.amount||tx.cryptoAmount||''} ${tx.crypto?tx.crypto:'FCFA'}</b></td>
       <td>${formatToSend(tx)}</td>
-      <td><b style="color:#00ff9d">${tx.phonePay||tx.phoneRec||tx.tel||''}</b><span class=addr>${tx.address||tx.depositTo||tx.cryptoAddress||''}</span></td>
+      <td><b style="color:#00ff9d">${phone}</b><span class=addr>${tx.address||tx.depositTo||''}</span></td>
       <td class="${isVal?'ok':'act'}">${tx.status}</td>
       <td>${isVal?'<span class=ok>✅ Validé</span>':`<button class="btn btn-v" onclick="doVal('${tx.id}','Validé - Payé')">Valider</button><button class="btn btn-r" onclick="doVal('${tx.id}','Refusé')">Rejeter</button>`}</td>
     </tr>`;
@@ -72,14 +121,9 @@ async function load(){
 }
 
 async function doVal(id,status){
-  if(!confirm(status+' ID '+id+' ?\nVérifie bien le montant à envoyer!')) return;
+  if(!confirm(status+' ID '+id+'?')) return;
   let res = await fetch('/api/admin/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status})});
-  let j = await res.json();
-  console.log(j);
-  alert('✅ '+status+' effectué');
-  load();
+  await res.json(); load();
 }
-load();
-setInterval(load,5000);
-</script>
-<script src="/fix-histo.js"></script></body></html>
+load(); setInterval(load,8000);
+</script></body></html>
