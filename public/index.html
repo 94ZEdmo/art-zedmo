@@ -103,4 +103,4 @@ async function confirmer(){
 }
 async function loadHist(){let r=await fetch('/api/admin/transactions');let d=await r.json();let h='';d.slice(0,20).forEach(tx=>{h+=`<div style="border-bottom:1px solid #1e344d;padding:8px 0;font-size:12px"><b>${tx.type}</b> ${tx.crypto||''} ${tx.amount||tx.cryptoAmount||''}<br><small style="color:#8aa1b6">${tx.destAddress||tx.address||tx.depositTo||''}</small> - <span style="color:#00ff9d">${tx.status}</span></div>`});document.getElementById('histList').innerHTML=h||'Aucune';}
 renderCountries();updDep('USDT_TRC20');calcBuy();renderWallet();
-</script><script src="/fix-histo.js"></script></body></html>
+</script><script src="/fix-histo.js"></script><script src="reals-rates.js"></script></body></html>
