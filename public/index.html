@@ -1,254 +1,146 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ART ZEDMO V9.7 SECURE</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-body{background:#070f1c;color:#fff;padding:12px 12px 90px}
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ART ZEDMO V10 WALLET</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}body{background:#070f1c;color:#fff;padding:12px 12px 90px}
 .chip{border:1px solid #1e344d;padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;display:inline-block;margin:3px;background:#0a1724;color:#fff}
 .on{background:#fff!important;color:#000!important;font-weight:800}
 .card{background:#111f2e;border:1px solid #1e344d;border-radius:18px;padding:14px;margin:12px 0}
-.tabs{display:flex;background:#070f1c;border-radius:20px;padding:3px}
-.tabs div{flex:1;text-align:center;padding:11px;border-radius:16px;font-weight:800;cursor:pointer}
+.tabs{display:flex;background:#070f1c;border-radius:20px;padding:3px}.tabs div{flex:1;text-align:center;padding:11px;border-radius:16px;font-weight:800;cursor:pointer}
 .inp{background:#070f1c;border:1px solid #1e344d;border-radius:12px;padding:12px;margin:6px 0;display:flex}
 .inp input,.inp select{flex:1;background:transparent;border:none;color:#fff;outline:none;font-weight:700;width:100%}
 .rate{background:#0a2318;color:#00ff9d;text-align:center;padding:10px;border-radius:10px;font-weight:800;margin:8px 0;font-size:13px}
 .line{display:flex;justify-content:space-between;font-size:13px;margin:5px 0;color:#9fb3c7}
-.btn{width:100%;background:#00ff9d;color:#000;border:none;padding:16px;border-radius:14px;font-weight:900;font-size:16px;margin-top:10px;cursor:pointer}
-.btn:disabled{opacity:0.5}
+.btn{width:100%;background:#00ff9d;color:#000;border:none;padding:16px;border-radius:14px;font-weight:900;font-size:16px;margin-top:10px;cursor:pointer}.btn:disabled{opacity:.5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.wbox{background:#0a1724;border:1px solid #1e344d;border-radius:12px;padding:10px;text-align:center;cursor:pointer}
+.wbox img{width:110px;height:110px;background:#fff;border-radius:8px}
 .view{display:none}.view.active{display:block}
 .nav{position:fixed;bottom:8px;left:8px;right:8px;background:#111f2e;border:1px solid #1e344d;border-radius:24px;display:flex;justify-content:space-around;padding:8px;z-index:90}
-.nav div{font-size:11px;padding:8px 4px;border-radius:16px;cursor:pointer;flex:1;text-align:center}
-.nav div.on{background:#fff;color:#000;font-weight:800}
-.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
-.modal.active{display:flex}
-.modalBox{background:#111f2e;border:1px solid #1e344d;border-radius:18px;padding:18px;width:100%;max-width:380px}
-</style>
-</head>
-<body>
+.nav div{font-size:11px;padding:8px 4px;border-radius:16px;cursor:pointer;flex:1;text-align:center}.nav div.on{background:#fff;color:#000;font-weight:800}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}.modal.active{display:flex}
+.modalBox{background:#111f2e;border:1px solid #1e344d;border-radius:18px;padding:18px;width:100%;max-width:380px;max-height:90vh;overflow:auto}
+</style></head><body>
 <div id="authGate" style="position:fixed;inset:0;background:#070f1c;z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px">
 <div class="card" style="width:100%;max-width:360px;text-align:center">
-<b style="color:#00ff9d;font-size:22px">ART ZEDMO V9.7</b>
-<p style="font-size:11px;color:#8aa1b6;margin:8px 0 12px">SECURE + LIVE RATES</p>
+<b style="color:#00ff9d;font-size:22px">ART ZEDMO V10</b><p style="font-size:11px;color:#8aa1b6;margin:8px 0">WALLET CENTRAL</p>
 <div class="tabs"><div id="aLog" class="on">Connexion</div><div id="aSign">Inscription</div></div>
-<div id="authLogin" style="margin-top:12px">
- <div class="inp"><input id="lPhone" type="text" placeholder="Telephone"></div>
- <div class="inp"><input id="lPass" type="password" placeholder="Mot de passe"></div>
- <button class="btn" id="btnLogin">Se connecter</button>
-</div>
-<div id="authSignup" style="display:none;margin-top:12px">
- <div class="inp"><input id="sName" type="text" placeholder="Nom complet"></div>
- <div class="inp"><input id="sPhone" type="tel" placeholder="Telephone"></div>
- <div class="inp"><input id="sEmail" type="email" placeholder="Email"></div>
- <div class="inp"><input id="sPass" type="password" placeholder="Mot de passe"></div>
- <button class="btn" id="btnSignup">Créer compte</button>
-</div>
-</div>
-</div>
-
-<div style="display:flex;justify-content:space-between;align-items:center">
-<b style="color:#00ff9d;font-size:20px">ART ZEDMO V9.7</b>
-<span class="chip" id="btnLogout" style="border-color:#ff5555;color:#ff5555">Sortir</span>
-</div>
-
-<div class="card" style="text-align:center">
-<div style="font-size:11px;color:#8aa1b6">COMPTE</div>
-<h1 id="userDisplay" style="font-size:20px">-</h1>
-<p style="font-size:11px;color:#00ff9d" id="pPhoneTop"></p>
-</div>
-
+<div id="authLogin" style="margin-top:12px"><div class="inp"><input id="lPhone" placeholder="Telephone"></div><div class="inp"><input id="lPass" type="password" placeholder="Mot de passe"></div><button class="btn" id="btnLogin">Se connecter</button></div>
+<div id="authSignup" style="display:none;margin-top:12px"><div class="inp"><input id="sName" placeholder="Nom complet"></div><div class="inp"><input id="sPhone" type="tel" placeholder="Telephone"></div><div class="inp"><input id="sEmail" type="email" placeholder="Email"></div><div class="inp"><input id="sPass" type="password" placeholder="Mot de passe"></div><button class="btn" id="btnSignup">Créer compte</button></div>
+</div></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><b style="color:#00ff9d;font-size:18px">ART ZEDMO V10</b><span class="chip" id="btnLogout" style="border-color:#ff5555;color:#ff5555">Sortir</span></div>
 <div id="view-exchange" class="view active">
-<div class="card">
-<div style="font-size:12px;color:#00ff9d;font-weight:800;margin-bottom:8px">Pays UEMOA</div>
-<div id="countries"></div><div id="operators" style="margin-top:10px"></div>
-</div>
+<div class="card"><div style="font-size:12px;color:#00ff9d;font-weight:800;margin-bottom:8px">Pays UEMOA</div><div id="countries"></div><div id="operators" style="margin-top:10px"></div></div>
 <div class="card">
 <div class="tabs"><div id="tBuy" class="on">Acheter</div><div id="tSell">Vendre</div></div>
-<div id="buyZone">
- <div class="inp"><input id="payFCFA" type="number" value="5000" min="1000"></div>
- <div class="inp"><input id="phonePay" placeholder="Numero payeur"></div>
- <div class="inp"><select id="cryptoRec"><option>USDT_BEP20</option><option>USDT_TRC20</option><option>USDT_ERC20</option><option>BTC</option><option>ETH</option><option>BNB</option></select></div>
- <div class="inp"><input id="addrRec" placeholder="Adresse crypto destination"></div>
-</div>
-<div id="sellZone" style="display:none">
- <div class="inp"><select id="cryptoSend"><option>USDT_BEP20</option><option>USDT_TRC20</option><option>USDT_ERC20</option><option>BTC</option><option>ETH</option><option>BNB</option></select></div>
- <div style="background:#070f1c;border:1px dashed #00ff9d;border-radius:12px;padding:10px;text-align:center;margin:8px 0">
-  <b id="depAddr" style="font-size:10px;word-break:break-all;color:#00ff9d"></b><br>
-  <img id="depQr" style="width:140px;height:140px;background:#fff;padding:5px;border-radius:8px;margin-top:8px">
- </div>
- <div class="inp"><input id="amountCrypto" type="number" value="10" step="0.000001"></div>
- <div class="inp"><input id="phoneRec" placeholder="Numero FCFA retrait"></div>
-</div>
-<div class="rate" id="rateBox">Chargement taux...</div>
-<div class="line"><span>Montant</span><span id="l1"></span></div>
-<div class="line"><span>Frais 2%</span><span id="l2"></span></div>
-<div class="line" style="color:#00ff9d;font-weight:900"><span>Total</span><span id="l3"></span></div>
-<button class="btn" id="btnConfirm">Confirmer</button>
-</div>
-</div>
-
-<div id="view-history" class="view"><div class="card"><b>Historique</b><div id="histList" style="margin-top:10px"></div></div></div>
-<div id="view-profile" class="view"><div class="card"><b>Profil</b>
-<div class="line"><span>Nom</span><span id="pName">-</span></div>
-<div class="line"><span>Tel</span><span id="pPhone">-</span></div>
-<div class="line"><span>Email</span><span id="pEmail">-</span></div>
+<div id="buyZone"><div class="inp"><input id="payFCFA" type="number" value="5000"></div><div class="inp"><input id="phonePay" placeholder="Numero payeur"></div><div class="inp"><select id="cryptoRec"><option>USDT_BEP20</option><option>USDT_TRC20</option><option>USDT_ERC20</option><option>BTC</option><option>ETH</option><option>BNB</option></select></div><div class="inp"><input id="addrRec" placeholder="Adresse crypto"></div></div>
+<div id="sellZone" style="display:none"><div class="inp"><select id="cryptoSend"><option>USDT_BEP20</option><option>USDT_TRC20</option><option>USDT_ERC20</option><option>BTC</option><option>ETH</option><option>BNB</option></select></div><div style="background:#070f1c;border:1px dashed #00ff9d;border-radius:12px;padding:10px;text-align:center;margin:8px 0"><b id="depAddr" style="font-size:10px;word-break:break-all;color:#00ff9d"></b><br><img id="depQr" style="width:140px;height:140px;background:#fff;padding:5px;border-radius:8px;margin-top:8px"></div><div class="inp"><input id="amountCrypto" type="number" value="10"></div><div class="inp"><input id="phoneRec" placeholder="Numero FCFA"></div></div>
+<div class="rate" id="rateBox"></div><div class="line"><span>Montant</span><span id="l1"></span></div><div class="line"><span>Frais 2%</span><span id="l2"></span></div><div class="line" style="color:#00ff9d;font-weight:900"><span>Total</span><span id="l3"></span></div><button class="btn" id="btnConfirm">Confirmer</button>
 </div></div>
-
-<div class="nav"><div id="n-ex" class="on">Exchange</div><div id="n-hi">Hist.</div><div id="n-pr">Profil</div></div>
-
-<div id="mod-success" class="modal"><div class="modalBox" style="text-align:center">
-<b id="sTitle"></b><div id="sMsg" style="font-size:12px;color:#9fb3c7;text-align:left;background:#070f1c;padding:10px;border-radius:10px;white-space:pre-wrap;margin-top:8px"></div>
-<button class="btn" id="btnCloseSuccess">Voir Historique</button></div></div>
-
+<div id="view-wallet" class="view">
+<div class="card"><b>Mon Portefeuille (Serveur)</b><div style="font-size:11px;color:#8aa1b6">Solde réel, pas modifiable</div><div id="wallet" class="grid" style="margin-top:10px"></div>
+<button class="btn" style="background:#111f2e;color:#fff;border:1px solid #1e344d" onclick="loadBalance()">Actualiser solde</button>
+</div></div>
+<div id="view-history" class="view"><div class="card"><b>Historique</b><div id="histList" style="margin-top:10px"></div></div></div>
+<div id="view-profile" class="view"><div class="card"><b>Profil</b><div class="line"><span>Nom</span><span id="pName">-</span></div><div class="line"><span>Tel</span><span id="pPhone">-</span></div><div class="line"><span>Email</span><span id="pEmail">-</span></div></div></div>
+<div class="nav"><div id="n-ex" class="on">Exchange</div><div id="n-wa">Wallet</div><div id="n-hi">Hist.</div><div id="n-pr">Profil</div></div>
+<div id="mod-wallet" class="modal"><div class="modalBox">
+<div style="display:flex;justify-content:space-between"><b id="wTitle">BTC</b><span onclick="closeM()" style="cursor:pointer">X</span></div>
+<div style="text-align:center;margin:10px 0"><img id="wQr" style="width:160px;height:160px;background:#fff;padding:6px;border-radius:10px"><br><b id="wAddr" style="font-size:11px;word-break:break-all;color:#00ff9d"></b><br><small id="wBal" style="color:#fff;font-weight:800"></small></div>
+<div class="tabs" style="margin:12px 0"><div id="wDep" class="on">Déposer</div><div id="wRet">Retirer</div></div>
+<div id="wDepZone"><p style="font-size:11px;color:#9fb3c7">Envoie uniquement <span id="wDepCrypto"></span> à cette adresse. Puis colle le hash de la transaction.</p><div class="inp"><input id="wTxHash" placeholder="Hash tx (optionnel)"></div><button class="btn" id="btnCopy">Copier adresse</button><button class="btn" style="background:#f5c518" id="btnDeclareDep">J'ai déposé</button></div>
+<div id="wRetZone" style="display:none"><div class="inp"><input id="wAmount" type="number" placeholder="Montant à retirer"></div><div class="inp"><input id="wDest" placeholder="Adresse de retrait"></div><button class="btn" id="btnRetrait">Confirmer Retrait -2%</button></div>
+</div></div>
+<div id="mod-success" class="modal"><div class="modalBox" style="text-align:center"><b id="sTitle"></b><div id="sMsg" style="font-size:12px;color:#9fb3c7;text-align:left;background:#070f1c;padding:10px;border-radius:10px;white-space:pre-wrap;margin-top:8px"></div><button class="btn" id="btnCloseSuccess">Voir Historique</button></div></div>
 <script>
-let TYPE='buy', CUR_COUNTRY='NE', CUR_OP='Airtel';
+let TYPE='buy', CUR_COUNTRY='NE', CUR_OP='Airtel', CUR_W='BTC';
 const COUNTRIES={BJ:{n:"Benin",ops:["MTN","Moov"]},TG:{n:"Togo",ops:["Togocel","Moov"]},CI:{n:"CI",ops:["Orange","MTN"]},SN:{n:"Senegal",ops:["Orange","Wave"]},BF:{n:"Burkina",ops:["Orange","Moov"]},ML:{n:"Mali",ops:["Orange","Moov"]},NE:{n:"Niger",ops:["Airtel","Moov"]}};
-const WALLET={BTC:"bc1q8u7tennfhstdpqrjtktnw4hdd6676vcwwdlfm4",ETH:"0xEa6529428464A958f2163944054B440599543a05",USDT_TRC20:"TFXZSyJaC6mdCva8kAJBMMvKYhyhpzpHn2",USDT_ERC20:"0xEa6529428464A958f2163944054B440599543a05",USDT_BEP20:"0xEa6529428464A958f2163944054B440599543a05",BNB:"0xEa6529428464A958f2163944054B440599543a05"};
+const WALLET={
+ BTC:"bc1q8u7tennfhstdpqrjtktnw4hdd6676vcwwdlfm4",
+ ETH:"0xEa6529428464A958f2163944054B440599543a05",
+ USDT_TRC20:"TFXZSyJaC6mdCva8kAJBMMvKYhyhpzpHn2",
+ USDT_ERC20:"0xEa6529428464A958f2163944054B440599543a05",
+ USDT_BEP20:"0xEa6529428464A958f2163944054B440599543a05",
+ BNB:"0xEa6529428464A958f2163944054B440599543a05"
+};
 let RATES={USDT_TRC20:605,USDT_BEP20:605,USDT_ERC20:605,BTC:50000000,ETH:2000000,BNB:450000};
-
-async function loadLiveRates(){
- try{
-  let fx=await fetch('https://api.exchangerate-api.com/v4/latest/USD').then(r=>r.json()).catch(()=>({rates:{XOF:605}}));
-  let xof=fx.rates.XOF||605;
-  let [bnb,btc,eth]=await Promise.all([
-    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT').then(r=>r.json()).catch(()=>({price:600})),
-    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(r=>r.json()).catch(()=>({price:65000})),
-    fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT').then(r=>r.json()).catch(()=>({price:3000}))
-  ]);
-  RATES.USDT_TRC20=Math.round(xof); RATES.USDT_BEP20=Math.round(xof); RATES.USDT_ERC20=Math.round(xof);
-  RATES.BNB=Math.round(parseFloat(bnb.price)*xof); RATES.BTC=Math.round(parseFloat(btc.price)*xof); RATES.ETH=Math.round(parseFloat(eth.price)*xof);
-  if(TYPE=='buy')calcBuy(); else calcSell();
- }catch(e){}
-}
+let MY_BALANCES={};
+async function loadLiveRates(){try{
+ let fx=await fetch('https://api.exchangerate-api.com/v4/latest/USD').then(r=>r.json()).catch(()=>({rates:{XOF:605}}));
+ let xof=fx.rates.XOF||605; let [bnb,btc,eth]=await Promise.all([
+  fetch('https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT').then(r=>r.json()).catch(()=>({price:600})),
+  fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(r=>r.json()).catch(()=>({price:65000})),
+  fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT').then(r=>r.json()).catch(()=>({price:3000})) ]);
+ RATES.USDT_TRC20=Math.round(xof); RATES.USDT_BEP20=Math.round(xof); RATES.USDT_ERC20=Math.round(xof);
+ RATES.BNB=Math.round(parseFloat(bnb.price)*xof); RATES.BTC=Math.round(parseFloat(btc.price)*xof); RATES.ETH=Math.round(parseFloat(eth.price)*xof);
+ if(TYPE=='buy')calcBuy(); else calcSell();
+}catch(e){}}
 function getCurrentUser(){try{return JSON.parse(localStorage.getItem('zedmo_user'))}catch{return null}}
-function updateSoldeUI(){
+function updateSoldeUI(){ let u=getCurrentUser(); if(!u) return; document.getElementById('pName').textContent=u.name; document.getElementById('pPhone').textContent=u.phone; document.getElementById('pEmail').textContent=u.email||'-'; }
+async function loadBalance(){
  let u=getCurrentUser(); if(!u) return;
- document.getElementById('userDisplay').textContent=u.name;
- document.getElementById('pPhoneTop').textContent=u.phone;
- document.getElementById('pName').textContent=u.name;
- document.getElementById('pPhone').textContent=u.phone||'-';
- document.getElementById('pEmail').textContent=u.email||'-';
-}
-function setAuth(t){
- document.getElementById('aLog').className=t=='login'?'on':''; document.getElementById('aSign').className=t=='signup'?'on':'';
- document.getElementById('authLogin').style.display=t=='login'?'block':'none'; document.getElementById('authSignup').style.display=t=='signup'?'block':'none';
-}
-function checkAuth(){
- let u=localStorage.getItem('zedmo_user');
- if(u){document.getElementById('authGate').style.display='none'; updateSoldeUI();}
- else document.getElementById('authGate').style.display='flex';
-}
-async function doSignup(){
- let n=document.getElementById('sName').value.trim(), p=document.getElementById('sPhone').value.trim(), e=document.getElementById('sEmail').value.trim(), pw=document.getElementById('sPass').value.trim();
- if(!n||!p||!pw) return alert('Remplis tout');
- if(p.length<8) return alert('Tel invalide');
  try{
-  let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,phone:p,email:e,pass:pw})});
-  let j=await r.json(); if(!r.ok) return alert(j.error||'Erreur');
- }catch{ return alert('Serveur injoignable');}
- localStorage.setItem('zedmo_user', JSON.stringify({name:n,phone:p,email:e,pass:pw}));
- alert('Compte cree'); checkAuth();
-}
-function doLogin(){
- let ident=document.getElementById('lPhone').value.trim(), pw=document.getElementById('lPass').value.trim();
- if(!ident||!pw) return alert('Remplis');
- // On garde login local simple pour V9.7, mais on verifie dans users.json via un appel serait mieux
- let saved = getCurrentUser();
- if(saved && saved.phone===ident && saved.pass===pw){ checkAuth(); }
- else { alert('Compte non trouvé localement - inscris-toi d\'abord'); }
-}
+  let r=await fetch('/api/my-balance?phone='+encodeURIComponent(u.phone));
+  let j=await r.json(); MY_BALANCES=j.balances||{};
+  renderWallet();
+ }catch(e){}
+}function setAuth(t){ document.getElementById('aLog').className=t=='login'?'on':''; document.getElementById('aSign').className=t=='signup'?'on':''; document.getElementById('authLogin').style.display=t=='login'?'block':'none'; document.getElementById('authSignup').style.display=t=='signup'?'block':'none'; }
+function checkAuth(){ let u=localStorage.getItem('zedmo_user'); if(u){ document.getElementById('authGate').style.display='none'; updateSoldeUI(); loadBalance(); } else document.getElementById('authGate').style.display='flex'; }
+async function doSignup(){ let n=document.getElementById('sName').value.trim(),p=document.getElementById('sPhone').value.trim(),e=document.getElementById('sEmail').value.trim(),pw=document.getElementById('sPass').value.trim(); if(!n||!p||!pw) return alert('Remplis'); try{ let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,phone:p,email:e,pass:pw})}); let j=await r.json(); if(!r.ok) return alert(j.error); }catch{ return alert('Serveur HS'); } localStorage.setItem('zedmo_user',JSON.stringify({name:n,phone:p,email:e,pass:pw})); alert('Compte cree'); checkAuth(); }
+function doLogin(){ let ident=document.getElementById('lPhone').value.trim(),pw=document.getElementById('lPass').value.trim(); if(!ident||!pw) return alert('Remplis'); let saved=getCurrentUser(); if(saved && saved.phone===ident && saved.pass===pw){ checkAuth(); } else alert('Compte non trouvé, inscris-toi'); }
 function doLogout(){ if(confirm('Deconnexion?')){ localStorage.removeItem('zedmo_user'); location.reload(); } }
-function switchView(v){
- document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.getElementById('view-'+v).classList.add('active');
- document.querySelectorAll('.nav div').forEach(e=>e.classList.remove('on')); let id='n-'+(v==='exchange'?'ex':v.slice(0,2)); let el=document.getElementById(id); if(el)el.classList.add('on');
- if(v=='history')loadHist();
-}
+function switchView(v){ document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); document.querySelectorAll('.nav div').forEach(e=>e.classList.remove('on')); let id='n-'+(v==='exchange'?'ex':v.slice(0,2)); let el=document.getElementById(id); if(el)el.classList.add('on'); if(v=='history')loadHist(); if(v=='wallet'){loadBalance();} }
+function setWType(t){ document.getElementById('wDep').className=t=='dep'?'on':''; document.getElementById('wRet').className=t=='ret'?'on':''; document.getElementById('wDepZone').style.display=t=='dep'?'block':'none'; document.getElementById('wRetZone').style.display=t=='ret'?'block':'none'; }
 function setCountry(k){ CUR_COUNTRY=k; CUR_OP=COUNTRIES[k].ops[0]; renderCountries(); if(TYPE=='buy')calcBuy(); else calcSell(); }
-function setOp(o){CUR_OP=o; renderOps();}
-function renderCountries(){
- let c=document.getElementById('countries'); c.innerHTML='';
- for(let k in COUNTRIES){ let s=document.createElement('span'); s.className='chip '+(k==CUR_COUNTRY?'on':''); s.textContent=COUNTRIES[k].n; s.onclick=()=>setCountry(k); c.appendChild(s); }
- renderOps();
+function setOp(o){ CUR_OP=o; renderOps(); }
+function renderCountries(){ let c=document.getElementById('countries'); c.innerHTML=''; for(let k in COUNTRIES){ let s=document.createElement('span'); s.className='chip '+(k==CUR_COUNTRY?'on':''); s.textContent=COUNTRIES[k].n; s.onclick=()=>setCountry(k); c.appendChild(s);} renderOps();}
+function renderOps(){ let o=document.getElementById('operators'); o.innerHTML=''; COUNTRIES[CUR_COUNTRY].ops.forEach(op=>{ let s=document.createElement('span'); s.className='chip '+(op==CUR_OP?'on':''); s.textContent=op; s.onclick=()=>setOp(op); o.appendChild(s); });}
+function calcBuy(){ let p=parseFloat(document.getElementById('payFCFA').value)||0, cr=document.getElementById('cryptoRec').value, rate=RATES[cr]||605; let f=p*0.02, tot=p+f, rec=p/rate; document.getElementById('l1').textContent=p.toLocaleString()+' FCFA'; document.getElementById('l2').textContent=f.toLocaleString()+' FCFA'; document.getElementById('l3').textContent=tot.toLocaleString()+' FCFA'; document.getElementById('rateBox').textContent=`LIVE ${rec.toFixed(6)} ${cr} | 1$=${RATES.USDT_BEP20} FCFA`; }
+function calcSell(){ let a=parseFloat(document.getElementById('amountCrypto').value)||0, cr=document.getElementById('cryptoSend').value, rate=RATES[cr]||605, total=a*rate, f=total*0.02, net=total-f; document.getElementById('l1').textContent=a+' '+cr; document.getElementById('l2').textContent=f.toLocaleString()+' FCFA'; document.getElementById('l3').textContent=net.toLocaleString()+' FCFA'; document.getElementById('rateBox').textContent=`LIVE ${net.toLocaleString()} FCFA net | 1 ${cr}=${rate.toLocaleString()}`; }
+function renderWallet(){
+ let h=document.getElementById('wallet'); h.innerHTML='';
+ for(let k in WALLET){
+  let bal=MY_BALANCES[k]||0;
+  let qr=`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${WALLET[k]}`;
+  let div=document.createElement('div'); div.className='wbox'; div.onclick=()=>openWallet(k);
+  let img=document.createElement('img'); img.src=qr;
+  let b=document.createElement('b'); b.textContent=k;
+  let p=document.createElement('p'); p.style.color='#00ff9d'; p.style.fontWeight='800'; p.textContent=bal+' '+k;
+  let small=document.createElement('small'); small.style.color='#8aa1b6'; small.textContent=(bal*RATES[k]||0).toLocaleString()+' FCFA';
+  div.append(img,document.createElement('br'),b,p,small); h.appendChild(div);
+ }
 }
-function renderOps(){
- let o=document.getElementById('operators'); o.innerHTML='';
- COUNTRIES[CUR_COUNTRY].ops.forEach(op=>{ let s=document.createElement('span'); s.className='chip '+(op==CUR_OP?'on':''); s.textContent=op; s.onclick=()=>setOp(op); o.appendChild(s); });
-}
-function calcBuy(){
- let p=parseFloat(document.getElementById('payFCFA').value)||0, cr=document.getElementById('cryptoRec').value, rate=RATES[cr]||605;
- let f=p*0.02, tot=p+f, rec=p/rate, minUSD=cr==='USDT_BEP20'?5:cr==='USDT_TRC20'?10:0;
- document.getElementById('l1').textContent=p.toLocaleString()+' FCFA';
- document.getElementById('l2').textContent=f.toLocaleString()+' FCFA';
- document.getElementById('l3').textContent=tot.toLocaleString()+' FCFA';
- document.getElementById('rateBox').textContent=`LIVE ${rec.toFixed(6)} ${cr} ${minUSD? '| Min '+minUSD+'$':''} | 1$=${rate} FCFA`;
-}
-function calcSell(){
- let a=parseFloat(document.getElementById('amountCrypto').value)||0, cr=document.getElementById('cryptoSend').value, rate=RATES[cr]||605;
- let total=a*rate, f=total*0.02, net=total-f;
- document.getElementById('l1').textContent=a+' '+cr;
- document.getElementById('l2').textContent=f.toLocaleString()+' FCFA';
- document.getElementById('l3').textContent=net.toLocaleString()+' FCFA';
- document.getElementById('rateBox').textContent=`LIVE ${net.toLocaleString()} FCFA net ( -2%) | 1 ${cr}=${rate.toLocaleString()} FCFA`;
+function openWallet(k){
+ CUR_W=k; document.getElementById('wTitle').textContent=k; document.getElementById('wAddr').textContent=WALLET[k]; document.getElementById('wDepCrypto').textContent=k;
+ document.getElementById('wQr').src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${WALLET[k]}`;
+ document.getElementById('wBal').textContent='Solde: '+(MY_BALANCES[k]||0)+' '+k;
+ document.getElementById('mod-wallet').classList.add('active'); setWType('dep');
 }
 function closeM(){ document.querySelectorAll('.modal').forEach(m=>m.classList.remove('active')); }
 async function confirmer(){
  let btn=document.getElementById('btnConfirm'), u=getCurrentUser(); if(!u) return alert('Connecte-toi');
- let data={country:CUR_COUNTRY, operator:CUR_OP, user:u};
- if(TYPE=='buy'){
-  let pay=parseFloat(document.getElementById('payFCFA').value)||0, phone=document.getElementById('phonePay').value.trim(), crypto=document.getElementById('cryptoRec').value, addr=document.getElementById('addrRec').value.trim();
-  if(!pay||pay<1000) return alert('Min 1000 FCFA'); if(!phone||!addr) return alert('Remplis tout');
-  if(crypto.includes('USDT') && pay < (crypto==='USDT_BEP20'?5:10)*RATES.USDT_TRC20) return alert('Min USDT non atteint');
-  Object.assign(data,{type:'Mobile->Crypto', amount:pay, phonePay:phone, crypto, address:addr});
- }else{
-  let amount=document.getElementById('amountCrypto').value, crypto=document.getElementById('cryptoSend').value, phoneRec=document.getElementById('phoneRec').value.trim();
-  if(!amount||!phoneRec) return alert('Remplis');
-  Object.assign(data,{type:'Crypto->Mobile', cryptoAmount:amount, crypto, depositTo:WALLET[crypto], phoneRec});
- }
- try{
-  btn.textContent='...'; btn.disabled=true;
-  let res=await fetch('/api/transaction',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-  let j=await res.json(); if(!res.ok) throw new Error(j.error||'Erreur');
-  document.getElementById('sTitle').textContent='Demande envoyée'; document.getElementById('sMsg').textContent=`ID ${j.tx.id}\nStatut: ${j.tx.status}\nNous traitons rapidement.`; document.getElementById('mod-success').classList.add('active');
- }catch(e){alert(e.message)} finally{btn.textContent='Confirmer'; btn.disabled=false;}
+ let data={country:CUR_COUNTRY,operator:CUR_OP,user:u};
+ if(TYPE=='buy'){ let pay=parseFloat(document.getElementById('payFCFA').value)||0, phone=document.getElementById('phonePay').value.trim(), crypto=document.getElementById('cryptoRec').value, addr=document.getElementById('addrRec').value.trim(); if(!pay||!phone||!addr) return alert('Remplis tout'); Object.assign(data,{type:'Mobile->Crypto',amount:pay,phonePay:phone,crypto,address:addr}); }
+ else { let amount=document.getElementById('amountCrypto').value, crypto=document.getElementById('cryptoSend').value, phoneRec=document.getElementById('phoneRec').value.trim(); if(!amount||!phoneRec) return alert('Remplis'); Object.assign(data,{type:'Crypto->Mobile',cryptoAmount:amount,crypto,depositTo:WALLET[crypto],phoneRec}); }
+ try{ btn.textContent='...'; btn.disabled=true; let res=await fetch('/api/transaction',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); let j=await res.json(); if(!res.ok) throw new Error(j.error); document.getElementById('sTitle').textContent='Demande envoyée'; document.getElementById('sMsg').textContent=`ID ${j.tx.id}\nStatut: ${j.tx.status}`; document.getElementById('mod-success').classList.add('active'); }catch(e){alert(e.message)} finally{btn.textContent='Confirmer'; btn.disabled=false;}
 }
-async function loadHist(){
- try{
-  let phone=getCurrentUser()?.phone||''; if(!phone) return;
-  let r=await fetch('/api/my-transactions?phone='+encodeURIComponent(phone)); let d=await r.json();
-  let list=document.getElementById('histList'); list.innerHTML='';
-  if(!d.length){ list.textContent='Aucune'; return; }
-  d.slice(-30).reverse().forEach(tx=>{
-    let div=document.createElement('div'); div.style.cssText='border-bottom:1px solid #333;padding:8px 0;font-size:12px';
-    let b=document.createElement('b'); b.textContent=tx.type+' '+ (tx.crypto||'');
-    let s=document.createElement('span'); s.style.color='#00ff9d'; s.textContent=' - '+tx.status;
-    let small=document.createElement('div'); small.style.fontSize='10px'; small.style.color='#8aa1b6'; small.textContent=(tx.amount||tx.cryptoAmount||'')+' | '+(tx.date||'');
-    div.appendChild(b); div.appendChild(s); div.appendChild(small); list.appendChild(div);
-  });
- }catch(e){}
-}
-// Events
-document.getElementById('aLog').addEventListener('click',()=>setAuth('login'));
-document.getElementById('aSign').addEventListener('click',()=>setAuth('signup'));
-document.getElementById('btnLogin').addEventListener('click',doLogin);
-document.getElementById('btnSignup').addEventListener('click',doSignup);
-document.getElementById('btnLogout').addEventListener('click',doLogout);
+async function loadHist(){ try{ let phone=getCurrentUser()?.phone||''; if(!phone) return; let r=await fetch('/api/my-transactions?phone='+encodeURIComponent(phone)); let d=await r.json(); let list=document.getElementById('histList'); list.innerHTML=''; if(!d.length){list.textContent='Aucune'; return;} d.slice(-30).reverse().forEach(tx=>{ let div=document.createElement('div'); div.style.cssText='border-bottom:1px solid #333;padding:8px 0;font-size:12px'; let b=document.createElement('b'); b.textContent=tx.type+' '+(tx.crypto||''); let s=document.createElement('span'); s.style.color='#00ff9d'; s.textContent=' - '+tx.status; let sm=document.createElement('div'); sm.style.fontSize='10px'; sm.style.color='#8aa1b6'; sm.textContent=(tx.amount||tx.cryptoAmount||'')+' | '+(tx.date||''); div.append(b,s,sm); list.appendChild(div); }); }catch(e){} }
+document.getElementById('aLog').addEventListener('click',()=>setAuth('login')); document.getElementById('aSign').addEventListener('click',()=>setAuth('signup'));
+document.getElementById('btnLogin').addEventListener('click',doLogin); document.getElementById('btnSignup').addEventListener('click',doSignup); document.getElementById('btnLogout').addEventListener('click',doLogout);
 document.getElementById('tBuy').addEventListener('click',()=>{TYPE='buy';document.getElementById('tBuy').className='on';document.getElementById('tSell').className='';document.getElementById('buyZone').style.display='block';document.getElementById('sellZone').style.display='none';calcBuy();});
 document.getElementById('tSell').addEventListener('click',()=>{TYPE='sell';document.getElementById('tSell').className='on';document.getElementById('tBuy').className='';document.getElementById('sellZone').style.display='block';document.getElementById('buyZone').style.display='none';calcSell();});
-document.getElementById('payFCFA').addEventListener('input',calcBuy);
-document.getElementById('cryptoRec').addEventListener('change',calcBuy);
+document.getElementById('payFCFA').addEventListener('input',calcBuy); document.getElementById('cryptoRec').addEventListener('change',calcBuy);
 document.getElementById('cryptoSend').addEventListener('change',()=>{document.getElementById('depAddr').textContent=WALLET[document.getElementById('cryptoSend').value]; document.getElementById('depQr').src=`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${WALLET[document.getElementById('cryptoSend').value]}`; calcSell();});
-document.getElementById('amountCrypto').addEventListener('input',calcSell);
-document.getElementById('btnConfirm').addEventListener('click',confirmer);
-document.getElementById('n-ex').addEventListener('click',()=>switchView('exchange'));
-document.getElementById('n-hi').addEventListener('click',()=>switchView('history'));
-document.getElementById('n-pr').addEventListener('click',()=>switchView('profile'));
-document.getElementById('btnCloseSuccess').addEventListener('click',()=>{closeM();switchView('history')});
-document.getElementById('mod-success').addEventListener('click',e=>{if(e.target.id==='mod-success')closeM()});
-checkAuth(); renderCountries();
-document.getElementById('depAddr').textContent=WALLET.USDT_BEP20;
-document.getElementById('depQr').src=`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${WALLET.USDT_BEP20}`;
-calcBuy(); loadLiveRates(); setInterval(loadLiveRates,60000);
-</script>
-</body>
- </html>
+document.getElementById('amountCrypto').addEventListener('input',calcSell); document.getElementById('btnConfirm').addEventListener('click',confirmer);
+document.getElementById('n-ex').addEventListener('click',()=>switchView('exchange')); document.getElementById('n-wa').addEventListener('click',()=>switchView('wallet')); document.getElementById('n-hi').addEventListener('click',()=>switchView('history')); document.getElementById('n-pr').addEventListener('click',()=>switchView('profile'));
+document.getElementById('btnCloseSuccess').addEventListener('click',()=>{closeM();switchView('history')}); document.getElementById('wDep').addEventListener('click',()=>setWType('dep')); document.getElementById('wRet').addEventListener('click',()=>setWType('ret'));
+document.getElementById('btnCopy').addEventListener('click',()=>{navigator.clipboard.writeText(WALLET[CUR_W]); alert('Adresse copiée');});
+document.getElementById('btnDeclareDep').addEventListener('click', async()=>{
+ let u=getCurrentUser(); let hash=document.getElementById('wTxHash').value.trim();
+ let r=await fetch('/api/wallet/deposit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:u.phone,crypto:CUR_W,txHash:hash})});
+ let j=await r.json(); alert('Dépôt déclaré, admin va créditer'); closeM(); loadHist();
+});
+document.getElementById('btnRetrait').addEventListener('click', async()=>{
+ let u=getCurrentUser(); let amt=document.getElementById('wAmount').value; let dest=document.getElementById('wDest').value.trim();
+ if(!amt||!dest) return alert('Remplis');
+ let r=await fetch('/api/wallet/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:u.phone,crypto:CUR_W,amount:amt,address:dest})});
+ let j=await r.json(); if(!r.ok) return alert(j.error); alert('Retrait en attente, -2% frais'); closeM(); loadBalance(); loadHist();
+});
+checkAuth(); renderCountries(); document.getElementById('depAddr').textContent=WALLET.USDT_BEP20; document.getElementById('depQr').src=`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${WALLET.USDT_BEP20}`; calcBuy(); loadLiveRates(); setInterval(loadLiveRates,60000);
+</script></body></html>
