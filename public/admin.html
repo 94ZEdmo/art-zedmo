@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang=fr><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>ADMIN ART ZEDMO PRO</title>
+<!DOCTYPE html><html lang=fr><head><meta charset="UTF-8"><meta name=viewport content="width=device-width,initial-scale=1"><title>ADMIN ART ZEDMO PRO V9.3 FINAL</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
 body{background:#070d1a;color:#e6edf3;padding:10px}
@@ -17,7 +17,7 @@ td{padding:8px 6px;border-top:1px solid #13223a;vertical-align:top}
 .btn{padding:6px 10px;border:none;border-radius:8px;font-weight:800;font-size:11px;cursor:pointer;width:70px;margin:2px 0;display:block}
 .btn-v{background:#00ff9d;color:#000}.btn-r{background:#ff3b3b;color:#fff}
 </style></head><body>
-<h1>👑 ADMIN ART ZEDMO PRO</h1>
+<h1>👑 ADMIN ART ZEDMO PRO V9.3 FINAL</h1>
 <div class=topbar>
 <div class=badge id=count>0 transactions</div>
 <div class=badge id=usersCount style="border-color:#00ff9d;color:#00ff9d">0 clients</div>
@@ -58,15 +58,15 @@ async function loadRates(){
 
 function formatToSend(tx){
   if((tx.type||'').includes('Mobile')){
-    let fcfa = tx.amount || 0;
-    let usdt = (parseFloat(fcfa)/RATES_LIVE.USDT_TRC20).toFixed(2);
+    let fcfa = parseFloat(tx.amount||0);
+    let usdt = (fcfa / RATES_LIVE.USDT_TRC20).toFixed(2);
     let crypto = tx.crypto || 'USDT_TRC20';
-    return `<span class=send>${usdt} ${crypto}</span><br><small>${fcfa} FCFA → LIVE</small>`;
+    return `<span class=send>${usdt} ${crypto}</span><br><small>${fcfa.toLocaleString()} FCFA → LIVE</small>`;
   } else {
     let amount = parseFloat(tx.cryptoAmount||tx.amount||0);
     let rate = RATES_LIVE[tx.crypto]||RATES_LIVE.USDT_TRC20;
     let fcfaNet = Math.round(amount*rate*0.98);
-    return `<span class=send>${fcfaNet.toLocaleString()} FCFA</span><br><small>${amount} ${tx.crypto||''} LIVE</small>`;
+    return `<span class=send>${fcfaNet.toLocaleString()} FCFA</span><br><small>${amount} ${tx.crypto||''} LIVE -2%</small>`;
   }
 }
 
@@ -75,12 +75,10 @@ async function load(){
   let r = await fetch('/api/admin/transactions');
   let data = await r.json();
 
-  // === STATS BUSINESS ===
   let totalVol = data.reduce((s,tx)=> s + (parseFloat(tx.amount)||0) + (parseFloat(tx.cryptoAmount||0)* (RATES_LIVE[tx.crypto]||0)),0);
   document.getElementById('count').innerText = data.length+' tx | Attente: '+data.filter(t=>(t.status||'').includes('attente')).length;
   document.getElementById('totalBusiness').innerText='Volume: '+Math.round(totalVol).toLocaleString()+' FCFA';
 
-  // === TABLE CLIENTS (agrégé depuis tx.user) ===
   let usersMap={};
   data.forEach(tx=>{
     let u=tx.user||{phone:tx.phonePay||tx.phoneRec||'Inconnu', name:tx.userName||'Client'};
@@ -97,9 +95,8 @@ async function load(){
   usersArr.reverse().forEach(u=>{
     hU+=`<tr><td><b>${u.name}</b></td><td style="color:#00ff9d">${u.phone}</td><td>${u.count} tx</td><td>${u.vol.toLocaleString()} FCFA déposé</td><td><small>${String(u.last).slice(-6)}</small></td></tr>`;
   });
-  document.getElementById('tbodyUsers').innerHTML=hU||'<tr><td colspan=5>Aucun client encore (les clients doivent faire 1 tx pour apparaître, ou on branche le backend users)</td></tr>';
+  document.getElementById('tbodyUsers').innerHTML=hU||'<tr><td colspan=5>Aucun client encore</td></tr>';
 
-  // === TABLE TRANSACTIONS ===
   let tbody='';
   data.slice().reverse().forEach(tx=>{
     let id = (tx.id+'').slice(-6);
