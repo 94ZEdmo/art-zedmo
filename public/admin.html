@@ -1,58 +1,140 @@
-<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ADMIN V9.6 FIX BEP20 EMAIL</title>
-<style>*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}body{background:#070d1a;color:#e6edf3;padding:10px}h1{color:#f5c518;font-size:18px}h2{color:#00ff9d;font-size:14px;margin:14px 0 6px}.topbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.badge{background:#111d2e;border:1px solid #1e3450;padding:8px 12px;border-radius:10px;font-size:13px}.btnTop{padding:8px 12px;border:none;border-radius:10px;font-weight:800;cursor:pointer}.tableWrap{overflow:auto;border-radius:12px;border:1px solid #1e3450;background:#0c1628;margin-bottom:12px}table{width:100%;border-collapse:collapse;min-width:950px;font-size:12px}th{background:#111d2e;color:#8ba0bf;padding:10px 6px;text-align:left}td{padding:8px 6px;border-top:1px solid #13223a;vertical-align:top}.addr{color:#00ff9d;font-size:10px;word-break:break-all;max-width:160px;display:block}.send{background:#f5c518;color:#000;padding:4px 8px;border-radius:8px;font-weight:900;display:inline-block;font-size:13px}.ok{color:#00ff9d}.act{color:#ff9d00}.btn{padding:6px 10px;border:none;border-radius:8px;font-weight:800;font-size:11px;cursor:pointer;width:75px;margin:2px 0;display:block}.btn-v{background:#00ff9d;color:#000}.btn-r{background:#ff3b3b;color:#fff}</style></head><body>
-<h1>👑 ADMIN ART ZEDMO V9.6 - BEP20 + EMAIL FIX</h1>
-<div class=topbar><div class=badge id=count>0 tx</div><div class=badge id=usersCount style="border-color:#00ff9d;color:#00ff9d">0 clients</div><div class=badge id=totalBusiness style="border-color:#f5c518;color:#f5c518">Volume: 0 FCFA</div><button class=btnTop onclick="load()" style="background:#1e3450;color:#fff">Actualiser</button><a href="/"><button class=btnTop style="background:#00d68f;color:#000">Retour App</button></a></div>
-<h2>👥 CLIENTS INSCRITS (Tel + Email)</h2><div class=tableWrap><table><thead><tr><th>Nom</th><th>Telephone</th><th>Email</th><th>Nb Tx</th><th>Volume</th><th>Date Inscription</th></tr></thead><tbody id=tbodyUsers></tbody></table></div>
-<h2>💸 TRANSACTIONS (TRC20 / BEP20)</h2><div class=tableWrap><table><thead><tr><th>ID</th><th>Type</th><th>Pays/Op</th><th>Montant Payé</th><th>À ENVOYER ➡️</th><th>Client + Adresse</th><th>Status</th><th>Action</th></tr></thead><tbody id=tbody></tbody></table></div>
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ADMIN V9.7 SECURE</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}body{background:#070d1a;color:#e6edf3;padding:10px}h1{color:#f5c518;font-size:18px}h2{color:#00ff9d;font-size:14px;margin:14px 0 6px}.topbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.badge{background:#111d2e;border:1px solid #1e3450;padding:8px 12px;border-radius:10px;font-size:13px}.btnTop{padding:8px 12px;border:none;border-radius:10px;font-weight:800;cursor:pointer}.tableWrap{overflow:auto;border-radius:12px;border:1px solid #1e3450;background:#0c1628;margin-bottom:12px}table{width:100%;border-collapse:collapse;min-width:1000px;font-size:12px}th{background:#111d2e;color:#8ba0bf;padding:10px 6px;text-align:left}td{padding:8px 6px;border-top:1px solid #13223a;vertical-align:top}.addr{color:#00ff9d;font-size:10px;word-break:break-all;max-width:180px;display:block}.send{background:#f5c518;color:#000;padding:4px 8px;border-radius:8px;font-weight:900;display:inline-block;font-size:13px}.ok{color:#00ff9d}.act{color:#ff9d00}.btn{padding:6px 10px;border:none;border-radius:8px;font-weight:800;font-size:11px;cursor:pointer;width:75px;margin:2px 0;display:block}.btn-v{background:#00ff9d;color:#000}.btn-r{background:#ff3b3b;color:#fff}
+#loginGate{position:fixed;inset:0;background:#070d1a;z-index:9999;display:flex;align-items:center;justify-content:center}
+</style></head><body>
+
+<div id="loginGate"><div style="background:#0c1628;padding:20px;border-radius:16px;border:1px solid #1e3450;width:90%;max-width:360px;text-align:center">
+<h2 style="color:#f5c518">🔐 ADMIN LOGIN</h2>
+<p style="font-size:11px;color:#8ba0bf;margin:8px 0">Clé définie dans server.js (ADMIN_KEY)</p>
+<input id="adminKeyInput" type="password" placeholder="Clé admin" style="width:100%;padding:12px;border-radius:10px;border:1px solid #1e3450;background:#070d1a;color:#fff;margin:10px 0">
+<button onclick="saveKey()" style="width:100%;padding:12px;background:#f5c518;border:none;border-radius:10px;font-weight:900;cursor:pointer">Entrer</button>
+<p id="loginErr" style="color:#ff5555;font-size:11px;margin-top:8px"></p>
+</div></div>
+
+<h1>👑 ADMIN ART ZEDMO V9.7 - SECURE</h1>
+<div class=topbar><div class=badge id=count>0 tx</div><div class=badge id=usersCount style="border-color:#00ff9d;color:#00ff9d">0 clients</div><div class=badge id=totalBusiness style="border-color:#f5c518;color:#f5c518">Volume: 0 FCFA</div><button class=btnTop onclick="load()" style="background:#1e3450;color:#fff">Actualiser</button><button class=btnTop onclick="logoutAdmin()" style="background:#ff3b3b;color:#fff">Logout</button><a href="/"><button class=btnTop style="background:#00d68f;color:#000">Retour App</button></a></div>
+
+<h2>👥 CLIENTS INSCRITS</h2><div class=tableWrap><table><thead><tr><th>Nom</th><th>Telephone</th><th>Email</th><th>Nb Tx</th><th>Volume</th><th>Date</th></tr></thead><tbody id=tbodyUsers></tbody></table></div>
+<h2>💸 TRANSACTIONS</h2><div class=tableWrap><table><thead><tr><th>ID</th><th>Type</th><th>Pays/Op</th><th>Montant</th><th>À ENVOYER ➡️</th><th>Client + Adresse</th><th>Status</th><th>Action</th></tr></thead><tbody id=tbody></tbody></table></div>
+
 <script>
 let RATES_LIVE={USDT_TRC20:605,USDT_BEP20:605,USDT_ERC20:605,BTC:50000000,ETH:2000000,BNB:450000};
-async function loadRates(){try{let fx=await fetch('https://api.exchangerate-api.com/v4/latest/USD').then(r=>r.json());let xof=fx.rates.XOF||605;RATES_LIVE.USDT_TRC20=Math.round(xof);RATES_LIVE.USDT_BEP20=Math.round(xof);RATES_LIVE.USDT_ERC20=Math.round(xof);let [bnb,btc,eth]=await Promise.all([fetch('https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT').then(r=>r.json()).catch(()=>({price:788})),fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(r=>r.json()).catch(()=>({price:87000})),fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT').then(r=>r.json()).catch(()=>({price:3200}))]);RATES_LIVE.BNB=Math.round(parseFloat(bnb.price)*xof);RATES_LIVE.BTC=Math.round(parseFloat(btc.price)*xof);RATES_LIVE.ETH=Math.round(parseFloat(eth.price)*xof);}catch(e){}}
-function formatToSend(tx){
-  // FIX CRITIQUE: === et pas includes()
+let ADMIN_KEY = localStorage.getItem('admin_key')||'';
+
+function saveKey(){
+  let k=document.getElementById('adminKeyInput').value.trim();
+  if(!k) return;
+  localStorage.setItem('admin_key',k);
+  ADMIN_KEY=k;
+  document.getElementById('loginGate').style.display='none';
+  load();
+}
+function logoutAdmin(){ localStorage.removeItem('admin_key'); location.reload(); }
+function checkAdminGate(){
+  if(ADMIN_KEY){ document.getElementById('loginGate').style.display='none'; }
+}
+checkAdminGate();
+
+async function loadRates(){try{
+  let fx=await fetch('https://api.exchangerate-api.com/v4/latest/USD').then(r=>r.json());
+  let xof=fx.rates.XOF||605;
+  RATES_LIVE.USDT_TRC20=Math.round(xof); RATES_LIVE.USDT_BEP20=Math.round(xof); RATES_LIVE.USDT_ERC20=Math.round(xof);
+  let [bnb,btc,eth]=await Promise.all([
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT').then(r=>r.json()).catch(()=>({price:600})),
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT').then(r=>r.json()).catch(()=>({price:65000})),
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT').then(r=>r.json()).catch(()=>({price:3000}))
+  ]);
+  RATES_LIVE.BNB=Math.round(parseFloat(bnb.price)*xof); RATES_LIVE.BTC=Math.round(parseFloat(btc.price)*xof); RATES_LIVE.ETH=Math.round(parseFloat(eth.price)*xof);
+}catch(e){}}
+
+function calcSend(tx){
   if(tx.type === 'Mobile->Crypto'){
-    let fcfa = parseFloat(tx.amount||0);
-    let rate = RATES_LIVE[tx.crypto]||RATES_LIVE.USDT_TRC20;
-    if(!rate) rate=605;
-    let cryptoAmt = (fcfa / rate).toFixed(6);
-    return `<span class=send>${cryptoAmt} ${tx.crypto}</span><br><small>${fcfa.toLocaleString()} FCFA → crypto</small>`;
+    let fcfa=parseFloat(tx.amount||0), rate=RATES_LIVE[tx.crypto]||605;
+    return {txt: (fcfa/rate).toFixed(6)+' '+tx.crypto, sub: fcfa.toLocaleString()+' FCFA -> crypto'};
   } else {
-    let amount = parseFloat(tx.cryptoAmount||tx.amount||0);
-    let rate = RATES_LIVE[tx.crypto]||RATES_LIVE.USDT_TRC20;
-    if(!rate) rate=605;
-    let fcfaNet = Math.round(amount*rate*0.98);
-    return `<span class=send>${fcfaNet.toLocaleString()} FCFA</span><br><small>${amount} ${tx.crypto} LIVE -2%</small>`;
+    let amt=parseFloat(tx.cryptoAmount||0), rate=RATES_LIVE[tx.crypto]||605;
+    let net=Math.round(amt*rate*0.98);
+    return {txt: net.toLocaleString()+' FCFA', sub: amt+' '+tx.crypto+' LIVE -2%'};
   }
 }
-async function load(){
-  await loadRates();
-  let rTx = await fetch('/api/admin/transactions');
-  let data = await rTx.json();
-  let usersDB = [];
-  try{ let rU = await fetch('/api/admin/users'); usersDB = await rU.json(); }catch{ usersDB=[]; }
-  let totalVol = data.reduce((s,tx)=> s + (parseFloat(tx.amount)||0), 0);
-  document.getElementById('count').innerText = data.length+' tx | Attente: '+data.filter(t=>(t.status||'').toLowerCase().includes('attente')).length;
-  document.getElementById('totalBusiness').innerText='Volume: '+Math.round(totalVol).toLocaleString()+' FCFA';
-  let usersMap={};
-  usersDB.forEach(u=>{ usersMap[u.phone]={name:u.name,phone:u.phone,email:u.email||'',date:u.date,count:0,vol:0} });
-  data.forEach(tx=>{
-    let phone = tx.user?.phone || tx.phonePay || tx.phoneRec || '';
-    if(!phone) return;
-    if(!usersMap[phone]) usersMap[phone]={name:tx.user?.name||'Client',phone:phone,email:tx.user?.email||'',date:'',count:0,vol:0};
-    usersMap[phone].count++;
-    usersMap[phone].vol+= parseFloat(tx.amount)||0;
-  });
-  let usersArr=Object.values(usersMap);
-  document.getElementById('usersCount').innerText=usersArr.length+' clients';
-  let hU=''; usersArr.reverse().forEach(u=>{
-    hU+=`<tr><td><b>${u.name}</b></td><td style="color:#00ff9d">${u.phone}</td><td style="font-size:11px;color:#8ba0bf">${u.email||'-'}</td><td>${u.count} tx</td><td>${u.vol.toLocaleString()} FCFA</td><td><small>${u.date||''}</small></td></tr>`;
-  });
-  document.getElementById('tbodyUsers').innerHTML=hU||'<tr><td colspan=6>Aucun client - vérifie /api/admin/users</td></tr>';
-  let tbody=''; data.slice().reverse().forEach(tx=>{
-    let id=(tx.id+'').slice(-6); let isVal=(tx.status||'').includes('Valid'); let phone=tx.user?.phone||tx.phonePay||tx.phoneRec||''; let name=tx.user?.name||''; let email=tx.user?.email||'';
-    tbody+=`<tr><td><b>${id}</b></td><td>${tx.type}<br><small style="color:#8ba0bf">${name}<br>${email}</small></td><td>${tx.country||''}/${tx.operator||''}</td><td><b>${tx.amount||tx.cryptoAmount} ${tx.crypto||'FCFA'}</b></td><td>${formatToSend(tx)}</td><td><b style="color:#00ff9d">${phone}</b><span class=addr>${tx.address||tx.depositTo||''}</span></td><td class="${isVal?'ok':'act'}">${tx.status}</td><td>${isVal?'<span class=ok>✅</span>':`<button class="btn btn-v" onclick="doVal('${tx.id}','Validé - Payé')">Valider</button><button class="btn btn-r" onclick="doVal('${tx.id}','Refusé')">Rejeter</button>`}</td></tr>`;
-  });
-  document.getElementById('tbody').innerHTML=tbody||'<tr><td colspan=8>Aucune transaction</td></tr>';
+
+async function fetchAdmin(url, opts={}){
+  opts.headers = {...(opts.headers||{}), 'x-admin-key': ADMIN_KEY, 'Content-Type':'application/json'};
+  let r=await fetch(url, opts);
+  if(r.status===401){ document.getElementById('loginGate').style.display='flex'; document.getElementById('loginErr').textContent='Clé invalide'; throw new Error('401'); }
+  return r;
 }
-async function doVal(id,status){if(!confirm(status+' '+id+'?'))return;await fetch('/api/admin/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,status})});load();}
-load();setInterval(load,8000);
+
+async function load(){
+  try{
+    await loadRates();
+    let rTx = await fetchAdmin('/api/admin/transactions');
+    let data = await rTx.json();
+    let usersDB=[]; try{ let rU=await fetchAdmin('/api/admin/users'); usersDB=await rU.json(); }catch{ usersDB=[]; }
+
+    // Volume corrigé: amount FCFA + cryptoAmount*rate
+    let totalVol = data.reduce((s,tx)=>{
+      if(tx.amount) return s+parseFloat(tx.amount);
+      if(tx.cryptoAmount){ let rate=RATES_LIVE[tx.crypto]||605; return s+ parseFloat(tx.cryptoAmount)*rate; }
+      return s;
+    },0);
+    document.getElementById('count').textContent = data.length+' tx | Attente: '+data.filter(t=>(t.status||'').toLowerCase().includes('attente')).length;
+    document.getElementById('totalBusiness').textContent='Volume: '+Math.round(totalVol).toLocaleString()+' FCFA';
+
+    // Users
+    let usersMap={};
+    usersDB.forEach(u=>{ usersMap[u.phone]={name:u.name,phone:u.phone,email:u.email||'',date:u.date,count:0,vol:0} });
+    data.forEach(tx=>{
+      let phone=tx.user?.phone||tx.phonePay||tx.phoneRec||''; if(!phone) return;
+      if(!usersMap[phone]) usersMap[phone]={name:tx.user?.name||'Client',phone,email:tx.user?.email||'',date:'',count:0,vol:0};
+      usersMap[phone].count++;
+      if(tx.amount) usersMap[phone].vol+=parseFloat(tx.amount);
+    });
+    let usersArr=Object.values(usersMap);
+    document.getElementById('usersCount').textContent=usersArr.length+' clients';
+    let tbodyU=document.getElementById('tbodyUsers'); tbodyU.innerHTML='';
+    usersArr.reverse().forEach(u=>{
+      let tr=document.createElement('tr');
+      let td1=document.createElement('td'); td1.textContent=u.name;
+      let td2=document.createElement('td'); td2.textContent=u.phone; td2.style.color='#00ff9d';
+      let td3=document.createElement('td'); td3.textContent=u.email||'-'; td3.style.fontSize='11px';
+      let td4=document.createElement('td'); td4.textContent=u.count+' tx';
+      let td5=document.createElement('td'); td5.textContent=u.vol.toLocaleString()+' FCFA';
+      let td6=document.createElement('td'); td6.textContent=(u.date||'').slice(0,10);
+      tr.append(td1,td2,td3,td4,td5,td6); tbodyU.appendChild(tr);
+    });
+
+    // Tx table secure (no innerHTML XSS)
+    let tbody=document.getElementById('tbody'); tbody.innerHTML='';
+    data.slice().reverse().forEach(tx=>{
+      let tr=document.createElement('tr');
+      let idShort=(tx.id+'').slice(-6);
+      let isVal=(tx.status||'').includes('Valid');
+      let phone=tx.user?.phone||tx.phonePay||tx.phoneRec||'';
+      let send=calcSend(tx);
+
+      let tdId=document.createElement('td'); tdId.textContent=idShort;
+      let tdType=document.createElement('td'); tdType.textContent=tx.type; let sm=document.createElement('small'); sm.style.color='#8ba0bf'; sm.textContent='\n'+(tx.user?.name||''); tdType.appendChild(document.createElement('br')); tdType.appendChild(sm);
+      let tdCountry=document.createElement('td'); tdCountry.textContent=(tx.country||'')+'/'+(tx.operator||'');
+      let tdAmt=document.createElement('td'); tdAmt.textContent=(tx.amount||tx.cryptoAmount||'')+' '+(tx.crypto||'');
+      let tdSend=document.createElement('td'); let bSend=document.createElement('span'); bSend.className='send'; bSend.textContent=send.txt; let sub=document.createElement('small'); sub.textContent='\n'+send.sub; tdSend.appendChild(bSend); tdSend.appendChild(document.createElement('br')); tdSend.appendChild(sub);
+      let tdClient=document.createElement('td'); let bPh=document.createElement('b'); bPh.style.color='#00ff9d'; bPh.textContent=phone; let spAddr=document.createElement('span'); spAddr.className='addr'; spAddr.textContent=tx.address||tx.depositTo||''; tdClient.appendChild(bPh); tdClient.appendChild(spAddr);
+      let tdStatus=document.createElement('td'); tdStatus.textContent=tx.status; tdStatus.className=isVal?'ok':'act';
+      let tdAct=document.createElement('td');
+      if(isVal){ tdAct.textContent='✅'; tdAct.className='ok'; }
+      else {
+        let btnV=document.createElement('button'); btnV.className='btn btn-v'; btnV.textContent='Valider'; btnV.onclick=()=>doVal(tx.id,'Validé - Payé');
+        let btnR=document.createElement('button'); btnR.className='btn btn-r'; btnR.textContent='Rejeter'; btnR.onclick=()=>doVal(tx.id,'Refusé');
+        tdAct.appendChild(btnV); tdAct.appendChild(btnR);
+      }
+      tr.append(tdId,tdType,tdCountry,tdAmt,tdSend,tdClient,tdStatus,tdAct);
+      tbody.appendChild(tr);
+    });
+  }catch(e){ console.log(e); }
+}
+
+async function doVal(id,status){ if(!confirm(status+' '+id+'?')) return; await fetchAdmin('/api/admin/validate',{method:'POST',body:JSON.stringify({id,status})}); load(); }
+
+if(ADMIN_KEY) load();
+setInterval(()=>{ if(ADMIN_KEY) load(); }, 15000); // 8s -> 15s moins bannable
 </script></body></html>
