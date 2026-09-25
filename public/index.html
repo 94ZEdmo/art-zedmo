@@ -38,8 +38,31 @@
 <button class="btn" style="background:#111f2e;color:#fff;border:1px solid #1e344d" onclick="loadBalance()">Actualiser solde</button>
 </div></div>
 <div id="view-history" class="view"><div class="card"><b>Historique</b><div id="histList" style="margin-top:10px"></div></div></div>
-<div id="view-profile" class="view"><div class="card"><b>Profil</b><div class="line"><span>Nom</span><span id="pName">-</span></div><div class="line"><span>Tel</span><span id="pPhone">-</span></div><div class="line"><span>Email</span><span id="pEmail">-</span></div></div></div>
-<div class="nav"><div id="n-ex" class="on">Exchange</div><div id="n-wa">Wallet</div><div id="n-hi">Hist.</div><div id="n-pr">Profil</div></div>
+<div id="view-profile" class="view"><div class="card"><b>Profil</b><div class="line"><span>Nom</span><span id="pName">-</span></div><div class="line"><span>Tel</span><span id="pPhone">-</span></div><div class="line"><span>Email</span><span id="pEmail">-</span></div></div>
+<!-- ========== AJOUT KYC / 2FA / WHATSAPP 0194655238 - DEBUT ========== -->
+<div class="card" style="border-color:#25D366">
+<a href="/api/contact/whatsapp" target="_blank" style="display:block;background:#25D366;color:#000;padding:14px;text-align:center;border-radius:12px;text-decoration:none;font-weight:900">💬 WhatsApp Support: 01 94 65 52 38</a>
+<div id="chartBox" style="margin-top:10px"><canvas id="chartTx" height="120"></canvas></div>
+</div>
+<div class="card" id="kycCard">
+<b>KYC - Vérification obligatoire avant transaction</b>
+<div class="line"><span>Status</span><span id="kycStatus" style="color:#ffaa00">Chargement...</span></div>
+<div class="inp"><select id="kycType"><option value="CNI">Carte Nationale (CNI)</option><option value="PASSEPORT">Passeport</option><option value="PERMIS">Permis de conduire</option></select></div>
+<div class="inp"><input id="kycNumero" placeholder="Numéro de la carte"></div>
+<div style="font-size:11px;color:#9fb3c7;margin:6px 0">Photo Recto</div><div class="inp"><input type="file" id="kycRecto" accept="image/*"></div>
+<div style="font-size:11px;color:#9fb3c7;margin:6px 0">Photo Verso</div><div class="inp"><input type="file" id="kycVerso" accept="image/*"></div>
+<button class="btn" id="btnKYC">Envoyer KYC</button>
+</div>
+<div class="card" id="twofaCard">
+<b>Sécurité Retrait - Google Auth + OTP</b>
+<div class="line"><span>2FA Status</span><span id="twofaStatus" style="color:#ff5555">Non activé</span></div>
+<button class="btn" style="background:#fff" id="btnSetup2FA">Activer Google Authenticator</button>
+<div id="qrBox" style="text-align:center;margin-top:10px"></div>
+<input type="hidden" id="my2faSecret">
+<div style="margin-top:12px"><b style="font-size:12px">Test OTP Email</b><div class="inp"><input id="otpEmail" placeholder="Email pour OTP"></div><button class="btn" style="background:#111f2e;color:#fff;border:1px solid #1e344d" id="btnSendOTP">Envoyer OTP</button></div>
+</div>
+<!-- ========== AJOUT FIN ========== -->
+                                                                                                                                                           </div><div class="nav"><div id="n-ex" class="on">Exchange</div><div id="n-wa">Wallet</div><div id="n-hi">Hist.</div><div id="n-pr">Profil</div></div>
 <div id="mod-wallet" class="modal"><div class="modalBox">
 <div style="display:flex;justify-content:space-between"><b id="wTitle">BTC</b><span onclick="closeM()" style="cursor:pointer">X</span></div>
 <div style="text-align:center;margin:10px 0"><img id="wQr" style="width:160px;height:160px;background:#fff;padding:6px;border-radius:10px"><br><b id="wAddr" style="font-size:11px;word-break:break-all;color:#00ff9d"></b><br><small id="wBal" style="color:#fff;font-weight:800"></small></div>
@@ -48,17 +71,11 @@
 <div id="wRetZone" style="display:none"><div class="inp"><input id="wAmount" type="number" placeholder="Montant à retirer"></div><div class="inp"><input id="wDest" placeholder="Adresse de retrait"></div><button class="btn" id="btnRetrait">Confirmer Retrait -2%</button></div>
 </div></div>
 <div id="mod-success" class="modal"><div class="modalBox" style="text-align:center"><b id="sTitle"></b><div id="sMsg" style="font-size:12px;color:#9fb3c7;text-align:left;background:#070f1c;padding:10px;border-radius:10px;white-space:pre-wrap;margin-top:8px"></div><button class="btn" id="btnCloseSuccess">Voir Historique</button></div></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let TYPE='buy', CUR_COUNTRY='NE', CUR_OP='Airtel', CUR_W='BTC';
 const COUNTRIES={BJ:{n:"Benin",ops:["MTN","Moov"]},TG:{n:"Togo",ops:["Togocel","Moov"]},CI:{n:"CI",ops:["Orange","MTN"]},SN:{n:"Senegal",ops:["Orange","Wave"]},BF:{n:"Burkina",ops:["Orange","Moov"]},ML:{n:"Mali",ops:["Orange","Moov"]},NE:{n:"Niger",ops:["Airtel","Moov"]}};
-const WALLET={
- BTC:"bc1q8u7tennfhstdpqrjtktnw4hdd6676vcwwdlfm4",
- ETH:"0xEa6529428464A958f2163944054B440599543a05",
- USDT_TRC20:"TFXZSyJaC6mdCva8kAJBMMvKYhyhpzpHn2",
- USDT_ERC20:"0xEa6529428464A958f2163944054B440599543a05",
- USDT_BEP20:"0xEa6529428464A958f2163944054B440599543a05",
- BNB:"0xEa6529428464A958f2163944054B440599543a05"
-};
+const WALLET={BTC:"bc1q8u7tennfhstdpqrjtktnw4hdd6676vcwwdlfm4",ETH:"0xEa6529428464A958f2163944054B440599543a05",USDT_TRC20:"TFXZSyJaC6mdCva8kAJBMMvKYhyhpzpHn2",USDT_ERC20:"0xEa6529428464A958f2163944054B440599543a05",USDT_BEP20:"0xEa6529428464A958f2163944054B440599543a05",BNB:"0xEa6529428464A958f2163944054B440599543a05"};
 let RATES={USDT_TRC20:605,USDT_BEP20:605,USDT_ERC20:605,BTC:50000000,ETH:2000000,BNB:450000};
 let MY_BALANCES={};
 async function loadLiveRates(){try{
@@ -80,12 +97,13 @@ async function loadBalance(){
   let j=await r.json(); MY_BALANCES=j.balances||{};
   renderWallet();
  }catch(e){}
-}function setAuth(t){ document.getElementById('aLog').className=t=='login'?'on':''; document.getElementById('aSign').className=t=='signup'?'on':''; document.getElementById('authLogin').style.display=t=='login'?'block':'none'; document.getElementById('authSignup').style.display=t=='signup'?'block':'none'; }
+}
+function setAuth(t){ document.getElementById('aLog').className=t=='login'?'on':''; document.getElementById('aSign').className=t=='signup'?'on':''; document.getElementById('authLogin').style.display=t=='login'?'block':'none'; document.getElementById('authSignup').style.display=t=='signup'?'block':'none'; }
 function checkAuth(){ let u=localStorage.getItem('zedmo_user'); if(u){ document.getElementById('authGate').style.display='none'; updateSoldeUI(); loadBalance(); } else document.getElementById('authGate').style.display='flex'; }
 async function doSignup(){ let n=document.getElementById('sName').value.trim(),p=document.getElementById('sPhone').value.trim(),e=document.getElementById('sEmail').value.trim(),pw=document.getElementById('sPass').value.trim(); if(!n||!p||!pw) return alert('Remplis'); try{ let r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,phone:p,email:e,pass:pw})}); let j=await r.json(); if(!r.ok) return alert(j.error); }catch{ return alert('Serveur HS'); } localStorage.setItem('zedmo_user',JSON.stringify({name:n,phone:p,email:e,pass:pw})); alert('Compte cree'); checkAuth(); }
 function doLogin(){ let ident=document.getElementById('lPhone').value.trim(),pw=document.getElementById('lPass').value.trim(); if(!ident||!pw) return alert('Remplis'); let saved=getCurrentUser(); if(saved && saved.phone===ident && saved.pass===pw){ checkAuth(); } else alert('Compte non trouvé, inscris-toi'); }
 function doLogout(){ if(confirm('Deconnexion?')){ localStorage.removeItem('zedmo_user'); location.reload(); } }
-function switchView(v){ document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); document.querySelectorAll('.nav div').forEach(e=>e.classList.remove('on')); let id='n-'+(v==='exchange'?'ex':v.slice(0,2)); let el=document.getElementById(id); if(el)el.classList.add('on'); if(v=='history')loadHist(); if(v=='wallet'){loadBalance();} }
+function switchView(v){ document.querySelectorAll('.view').forEach(e=>e.classList.remove('active')); document.getElementById('view-'+v).classList.add('active'); document.querySelectorAll('.nav div').forEach(e=>e.classList.remove('on')); let id='n-'+(v==='exchange'?'ex':v.slice(0,2)); let el=document.getElementById(id); if(el)el.classList.add('on'); if(v=='history')loadHist(); if(v=='wallet'){loadBalance();} if(v=='profile'){checkKYCStatus(); loadChart();} }
 function setWType(t){ document.getElementById('wDep').className=t=='dep'?'on':''; document.getElementById('wRet').className=t=='ret'?'on':''; document.getElementById('wDepZone').style.display=t=='dep'?'block':'none'; document.getElementById('wRetZone').style.display=t=='ret'?'block':'none'; }
 function setCountry(k){ CUR_COUNTRY=k; CUR_OP=COUNTRIES[k].ops[0]; renderCountries(); if(TYPE=='buy')calcBuy(); else calcSell(); }
 function setOp(o){ CUR_OP=o; renderOps(); }
@@ -114,6 +132,7 @@ function openWallet(k){
 }
 function closeM(){ document.querySelectorAll('.modal').forEach(m=>m.classList.remove('active')); }
 async function confirmer(){
+ if(!checkKYCBeforeTx()) return;
  let btn=document.getElementById('btnConfirm'), u=getCurrentUser(); if(!u) return alert('Connecte-toi');
  let data={country:CUR_COUNTRY,operator:CUR_OP,user:u};
  if(TYPE=='buy'){ let pay=parseFloat(document.getElementById('payFCFA').value)||0, phone=document.getElementById('phonePay').value.trim(), crypto=document.getElementById('cryptoRec').value, addr=document.getElementById('addrRec').value.trim(); if(!pay||!phone||!addr) return alert('Remplis tout'); Object.assign(data,{type:'Mobile->Crypto',amount:pay,phonePay:phone,crypto,address:addr}); }
@@ -132,15 +151,84 @@ document.getElementById('n-ex').addEventListener('click',()=>switchView('exchang
 document.getElementById('btnCloseSuccess').addEventListener('click',()=>{closeM();switchView('history')}); document.getElementById('wDep').addEventListener('click',()=>setWType('dep')); document.getElementById('wRet').addEventListener('click',()=>setWType('ret'));
 document.getElementById('btnCopy').addEventListener('click',()=>{navigator.clipboard.writeText(WALLET[CUR_W]); alert('Adresse copiée');});
 document.getElementById('btnDeclareDep').addEventListener('click', async()=>{
+ if(!checkKYCBeforeTx()) return;
  let u=getCurrentUser(); let hash=document.getElementById('wTxHash').value.trim();
  let r=await fetch('/api/wallet/deposit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:u.phone,crypto:CUR_W,txHash:hash})});
  let j=await r.json(); alert('Dépôt déclaré, admin va créditer'); closeM(); loadHist();
 });
 document.getElementById('btnRetrait').addEventListener('click', async()=>{
- let u=getCurrentUser(); let amt=document.getElementById('wAmount').value; let dest=document.getElementById('wDest').value.trim();
- if(!amt||!dest) return alert('Remplis');
+ if(!checkKYCBeforeTx()) return;
+ let u=getCurrentUser();
+ let email=u.email||document.getElementById('otpEmail').value||prompt('Email pour OTP');
+ if(!email) return alert('Email requis');
+ await fetch('/api/otp/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+ let codeOTP=prompt('Code OTP envoyé à '+email+' (regarde logs Render si test)');
+ if(!codeOTP) return;
+ let v1=await fetch('/api/otp/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,code:codeOTP})}).then(r=>r.json());
+ if(!v1.ok) return alert('OTP faux: '+v1.msg);
+ let secret=localStorage.getItem('my2faSecret')||localStorage.getItem('2faSecret');
+ if(secret){
+  let code2FA=prompt('Code Google Authenticator (6 chiffres)');
+  let v2=await fetch('/api/2fa/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({secret,token:code2FA})}).then(r=>r.json());
+  if(!v2.ok) return alert('2FA faux');
+ }
+ let amt=document.getElementById('wAmount').value; let dest=document.getElementById('wDest').value.trim();
+ if(!amt||!dest) return alert('Remplis montant + adresse');
  let r=await fetch('/api/wallet/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:u.phone,crypto:CUR_W,amount:amt,address:dest})});
  let j=await r.json(); if(!r.ok) return alert(j.error); alert('Retrait en attente, -2% frais'); closeM(); loadBalance(); loadHist();
 });
 checkAuth(); renderCountries(); document.getElementById('depAddr').textContent=WALLET.USDT_BEP20; document.getElementById('depQr').src=`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${WALLET.USDT_BEP20}`; calcBuy(); loadLiveRates(); setInterval(loadLiveRates,60000);
-</script></body></html>
+</script>
+<script>
+function fileToBase64(id){return new Promise((res,rej)=>{let f=document.getElementById(id).files[0]; if(!f) return res(''); let r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f);})}
+async function checkKYCStatus(){
+ let u=getCurrentUser(); if(!u) return;
+ try{
+  let r=await fetch('/api/kyc/status?phone='+encodeURIComponent(u.phone));
+  let j=await r.json();
+  let el=document.getElementById('kycStatus');
+  if(j.status==='Validé'){ el.textContent='Validé ✅'; el.style.color='#00ff9d'; localStorage.setItem('kycValidated','1'); }
+  else if(j.status==='En attente'){ el.textContent='En attente ⏳'; el.style.color='#ffaa00'; }
+  else { el.textContent='Non vérifié ❌'; el.style.color='#ff5555'; localStorage.removeItem('kycValidated'); }
+ }catch{}
+ let sec=localStorage.getItem('my2faSecret');
+ if(sec){ document.getElementById('twofaStatus').textContent='Activé ✅'; document.getElementById('twofaStatus').style.color='#00ff9d'; }
+}
+function checkKYCBeforeTx(){
+ let ok=localStorage.getItem('kycValidated')==='1';
+ if(!ok){ alert('KYC obligatoire! Va dans Profil -> KYC avant transaction.'); switchView('profile'); return false; }
+ return true;
+}
+document.getElementById('btnKYC')?.addEventListener('click', async()=>{
+ let u=getCurrentUser(); if(!u) return alert('Connecte-toi');
+ let numero=document.getElementById('kycNumero').value.trim(); if(!numero) return alert('Numéro carte requis');
+ let recto=await fileToBase64('kycRecto'); let verso=await fileToBase64('kycVerso');
+ if(!recto) return alert('Photo recto requise');
+ let btn=document.getElementById('btnKYC'); btn.textContent='Envoi...'; btn.disabled=true;
+ try{
+  let r=await fetch('/api/kyc/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:u.phone,type:document.getElementById('kycType').value,numero,recto,verso})});
+  let j=await r.json(); if(j.ok){ alert('KYC envoyé, admin va valider sous 24h'); checkKYCStatus(); } else alert(j.error);
+ }catch(e){alert(e.message)} finally{btn.textContent='Envoyer KYC'; btn.disabled=false;}
+});
+document.getElementById('btnSetup2FA')?.addEventListener('click', async()=>{
+ let u=getCurrentUser();
+ let r=await fetch('/api/2fa/setup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:u.phone})});
+ let j=await r.json();
+ if(j.ok){
+  localStorage.setItem('my2faSecret',j.secret);
+  document.getElementById('qrBox').innerHTML=`<img src="${j.qr}" style="width:180px;background:#fff;padding:8px;border-radius:8px"><p style="font-size:10px;word-break:break-all">${j.secret}</p><p style="font-size:11px">Scanne avec Google Authenticator</p>`;
+  document.getElementById('twofaStatus').textContent='Activé ✅'; document.getElementById('twofaStatus').style.color='#00ff9d';
+ } else alert(j.msg||'Erreur 2FA: fais npm install speakeasy qrcode sur serveur');
+});
+document.getElementById('btnSendOTP')?.addEventListener('click', async()=>{
+ let email=document.getElementById('otpEmail').value||getCurrentUser()?.email; if(!email) return alert('Entre email');
+ let r=await fetch('/api/otp/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+ let j=await r.json(); alert(j.ok?'OTP envoyé: '+j.code+' (test)':'Erreur');
+});
+async function loadChart(){
+ let u=getCurrentUser(); if(!u) return;
+ try{
+  let r=await fetch('/api/stats/chart/'+encodeURIComponent(u.phone)); let j=await r.json();
+  let ctx=document.getElementById('chartTx');
+  if(!ctx) return;
+  new Chart(ctx,
