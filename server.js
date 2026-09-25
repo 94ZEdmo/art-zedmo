@@ -88,4 +88,135 @@ app.post('/api/admin/validate',adminAuth,(req,res)=>{
  }
  save(DB,all); res.json({ok:true});
 });
+
+// =========== AJOUT KYC / OTP / 2FA / WHATSAPP 0194655238 - DEBUT (NE PAS SUPPRIMER) ===========
+const WHATSAPP_NUM='229194655238';
+const DB_KYC=path.join(__dirname,'kyc.json');
+const DB_OTP=path.join(__dirname,'otp.json');
+if(!fs.existsSync(DB_KYC)) fs.writeFileSync(DB_KYC,'[]');
+if(!fs.existsSync(DB_OTP)) fs.writeFileSync(DB_OTP,'{}');
+// Parser plus gros UNIQUEMENT pour KYC (photos)
+app.use('/api/kyc', express.json({limit:'20mb'}));
+
+// KYC SUBMIT
+app.post('/api/kyc/submit',(req,res)=>{
+ try{
+  let all=JSON.parse(fs.readFileSync(DB_KYC,'utf8'));
+  let k={
+   id:String(Date.now()),
+   userId:String(req.body.userId||req.body.phone||'inconnu').trim(),
+   type:req.body.type||'CNI',
+   numero:String(req.body.numero||'').trim(),
+   recto:req.body.recto||'',
+   verso:req.body.verso||'',
+   status:'En attente',
+   date:new Date().toISOString()
+  };
+  if(!k.numero) return res.status(400).json({error:'numero manquant'});
+  all.push(k);
+  fs.writeFileSync(DB_KYC,JSON.stringify(all,null,2));
+  res.json({ok:true,kycId:k.id});
+ }catch(e){res.status(500).json({error:e.message})}
+});
+
+// KYC LIST + VALIDATE (admin)
+app.get('/api/admin/kyc/list',adminAuth,(req,res)=>{
+ res.json(JSON.parse(fs.readFileSync(DB_KYC,'utf8')));
+});
+app.post('/api/admin/kyc/validate',adminAuth,(req,res)=>{
+ let all=JSON.parse(fs.readFileSync(DB_KYC,'utf8'));
+ let {id,status}=req.body;
+ all=all.map(k=>String(k.id)===String(id)?{...k,status}:k);
+ fs.writeFileSync(DB_KYC,JSON.stringify(all,null,2));
+ // Si validé, on marque aussi le user comme KYC OK
+ if(status==='Validé'){
+  let users=read(USERS_DB);
+  let target=all.find(k=>String(k.id)===String(id));
+  if(target){
+   let u=users.find(x=>String(x.phone)===String(target.userId));
+   if(u){ u.kycStatus='Validé'; u.kycType=target.type; save(USERS_DB,users); }
+  }
+ }
+ res.json({ok:true});
+});
+
+// KYC STATUS POUR UN USER
+app.get('/api/kyc/status',(req,res)=>{
+ let phone=String(req.query.phone||'').trim();
+ let all=JSON.parse(fs.readFileSync(DB_KYC,'utf8'));
+ let last=all.filter(k=>String(k.userId)===phone).pop();
+ res.json(last||{status:'Non vérifié'});
+});
+
+// OTP EMAIL/SMS (mode test gratuit, code dans logs + réponse)
+app.post('/api/otp/send',(req,res)=>{
+ let key=String(req.body.email||req.body.phone||'').trim();
+ if(!key) return res.status(400).json({error:'email/phone manquant'});
+ let code=Math.floor(100000+Math.random()*900000);
+ let store=JSON.parse(fs.readFileSync(DB_OTP,'utf8'));
+ store[key]={code,expire:Date.now()+300000};
+ fs.writeFileSync(DB_OTP,JSON.stringify(store,null,2));
+ console.log('OTP '+key+' = '+code);
+ res.json({ok:true,code,msg:'Test - code visible ici et dans logs Render'});
+});
+app.post('/api/otp/verify',(req,res)=>{
+ let key=String(req.body.email||req.body.phone||'').trim();
+ let store=JSON.parse(fs.readFileSync(DB_OTP,'utf8'));
+ let o=store[key];
+ if(!o) return res.json({ok:false,msg:'Pas de code'});
+ if(Date.now()>o.expire){ delete store[key]; fs.writeFileSync(DB_OTP,JSON.stringify(store,null,2)); return res.json({ok:false,msg:'Expiré'}); }
+ if(String(o.code)===String(req.body.code)){
+  delete store[key]; fs.writeFileSync(DB_OTP,JSON.stringify(store,null,2));
+  return res.json({ok:true});
+ }
+ res.json({ok:false,msg:'Mauvais code'});
+});
+
+// GOOGLE AUTH 2FA
+app.post('/api/2fa/setup',(req,res)=>{
+ try{
+  const speakeasy=require('speakeasy');
+  const qrcode=require('qrcode');
+  let secret=speakeasy.generateSecret({name:'ART-ZEDMO:'+(req.body.userId||'client')});
+  // Sauve secret dans users.json
+  let users=read(USERS_DB);
+  let u=users.find(x=>String(x.phone)===String(req.body.userId));
+  if(u){ u.google2fa=secret.base32; save(USERS_DB,users); }
+  qrcode.toDataURL(secret.otpauth_url,(e,qr)=>{
+   res.json({ok:true,secret:secret.base32,qr,otpauth:secret.otpauth_url});
+  });
+ }catch(e){ res.json({ok:false,msg:'Fais npm install speakeasy qrcode',error:e.message}) }
+});
+app.post('/api/2fa/verify',(req,res)=>{
+ try{
+  const speakeasy=require('speakeasy');
+  let ok=speakeasy.totp.verify({secret:req.body.secret,encoding:'base32',token:req.body.token,window:1});
+  res.json({ok:!!ok});
+ }catch(e){ res.json({ok:false}) }
+});
+
+// WHATSAPP 01 94 65 52 38
+app.get('/api/contact/whatsapp',(req,res)=>{
+ let msg=req.query.msg||'Bonjour ART-ZEDMO, besoin d aide';
+ res.redirect(`https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`);
+});
+app.get('/api/admin/whatsapp-client',(req,res)=>{
+ let phone=String(req.query.phone||'').replace(/\D/g,'');
+ if(phone.startsWith('01')) phone='229'+phone.slice(1);
+ if(!phone.startsWith('229')) phone='229'+phone.slice(-8);
+ let msg=req.query.msg||'Bonjour, c est ART-ZEDMO';
+ res.redirect(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
+});
+
+// STATS CHART POUR PROFILE
+app.get('/api/stats/chart/:phone',(req,res)=>{
+ let phone=String(req.params.phone).slice(-8);
+ let all=read(DB);
+ let list=all.filter(t=>String(t.phonePay||'').includes(phone)||String(t.phoneRec||'').includes(phone));
+ let parMois={};
+ list.forEach(t=>{ let m=(t.date||'').slice(0,7); parMois[m]=(parMois[m]||0)+1; });
+ res.json({total:list.length,parMois,list});
+});
+// =========== AJOUT FIN ===========
+
 app.listen(process.env.PORT||3000,()=>console.log('V10 WALLET SECURE '+ADMIN_KEY));
