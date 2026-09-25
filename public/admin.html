@@ -17,6 +17,11 @@
 <h1>👑 ADMIN ART ZEDMO V10 - WALLET CENTRAL</h1>
 <div class=topbar><div class=badge id=count>0 tx</div><div class=badge id=usersCount style="border-color:#00ff9d;color:#00ff9d">0 clients</div><div class=badge id=totalBusiness style="border-color:#f5c518;color:#f5c518">Volume: 0 FCFA</div><button class=btnTop onclick="load()" style="background:#1e3450;color:#fff">Actualiser</button><button class=btnTop onclick="logoutAdmin()" style="background:#ff3b3b;color:#fff">Logout</button><a href="/"><button class=btnTop style="background:#00d68f;color:#000">Retour App</button></a></div>
 
+<!-- ========== AJOUT KYC ADMIN + WHATSAPP 0194655238 DEBUT ========== -->
+<h2>🛡️ KYC EN ATTENTE - 01 94 65 52 38</h2>
+<div class="tableWrap"><table><thead><tr><th>ID</th><th>Client (Tel)</th><th>Type/Numéro</th><th>Recto</th><th>Verso</th><th>Status</th><th>WhatsApp</th><th>Action</th></tr></thead><tbody id="tbodyKYC"></tbody></table></div>
+<!-- ========== AJOUT FIN ========== -->
+
 <h2>🏦 PORTEFEUILLE CENTRAL (Total de tous les clients)</h2>
 <div id="walletTotal" class="walletTotal"></div>
 <div style="font-size:11px;color:#8aa1b6;margin-bottom:12px">Tes adresses de dépôt central :<br>
@@ -25,7 +30,7 @@
 <span style="color:#00ff9d">BEP20/ERC20/BNB:</span> 0xEa6529428464A958f2163944054B440599543a05
 </div>
 
-<h2>👥 CLIENTS + LEURS SOLDES</h2><div class=tableWrap><table><thead><tr><th>Nom</th><th>Tel</th><th>Email</th><th>BTC</th><th>USDT_TRC20</th><th>USDT_BEP20</th><th>ETH/BNB</th><th>Total FCFA</th></tr></thead><tbody id=tbodyUsers></tbody></table></div>
+<h2>👥 CLIENTS + LEURS SOLDES</h2><div class=tableWrap><table><thead><tr><th>Nom</th><th>Tel</th><th>Email</th><th>BTC</th><th>USDT_TRC20</th><th>USDT_BEP20</th><th>ETH/BNB</th><th>Total FCFA</th><th>WhatsApp</th><th>KYC/2FA</th></tr></thead><tbody id=tbodyUsers></tbody></table></div>
 
 <h2>💸 DEPOTS / RETRAITS WALLET (À TRAITER)</h2><div class=tableWrap><table><thead><tr><th>ID</th><th>Type</th><th>Client</th><th>Crypto</th><th>Montant</th><th>Hash / Adresse</th><th>Status</th><th>Action</th></tr></thead><tbody id=tbodyWallet></tbody></table></div>
 
@@ -52,6 +57,27 @@ async function load(){
   let rTx=await fetchAdmin('/api/admin/transactions'); let data=await rTx.json();
   let rU=await fetchAdmin('/api/admin/users'); let usersDB=await rU.json();
   let rW=await fetchAdmin('/api/admin/wallets'); let wData=await rW.json();
+  let rK=await fetchAdmin('/api/admin/kyc/list').then(r=>r.json()).catch(()=>[]);
+
+  // KYC TABLE
+  let tbodyK=document.getElementById('tbodyKYC'); tbodyK.innerHTML='';
+  rK.reverse().forEach(k=>{
+   let tr=document.createElement('tr');
+   let id=document.createElement('td'); id.textContent=(k.id+'').slice(-6);
+   let cli=document.createElement('td'); cli.textContent=k.userId; cli.style.color='#00ff9d';
+   let typ=document.createElement('td'); typ.textContent=k.type+' / '+k.numero;
+   let rect=document.createElement('td'); rect.innerHTML=k.recto?`<a href="${k.recto}" target="_blank"><img src="${k.recto}" style="width:60px;height:40px;object-fit:cover;border-radius:4px"></a>`:'-';
+   let vers=document.createElement('td'); vers.innerHTML=k.verso?`<a href="${k.verso}" target="_blank"><img src="${k.verso}" style="width:60px;height:40px;object-fit:cover;border-radius:4px"></a>`:'-';
+   let sta=document.createElement('td'); sta.textContent=k.status; sta.className=k.status==='Validé'?'ok':'act';
+   let wa=document.createElement('td'); let aWa=document.createElement('a'); aWa.href=`/api/admin/whatsapp-client?phone=${encodeURIComponent(k.userId)}&msg=${encodeURIComponent('Bonjour, KYC '+k.status)}`; aWa.target='_blank'; aWa.textContent='💬'; aWa.style.fontSize='18px'; wa.appendChild(aWa);
+   let act=document.createElement('td');
+   if(k.status!=='Validé' && k.status!=='Refusé'){
+    let bv=document.createElement('button'); bv.className='btn btn-v'; bv.textContent='Valider'; bv.onclick=()=>doKYC(k.id,'Validé');
+    let br=document.createElement('button'); br.className='btn btn-r'; br.textContent='Refuser'; br.onclick=()=>doKYC(k.id,'Refusé');
+    act.append(bv,br);
+   } else act.textContent='✅';
+   tr.append(id,cli,typ,rect,vers,sta,wa,act); tbodyK.appendChild(tr);
+  });
 
   // Totaux
   let totalDiv=document.getElementById('walletTotal'); totalDiv.innerHTML='';
@@ -74,6 +100,9 @@ async function load(){
    let totFCFA=Object.keys(u.balances||{}).reduce((s,k)=>s+(u.balances[k]*RATES[k]||0),0);
    let cells=[u.name,u.phone,u.email||'-', (u.balances.BTC||0).toFixed(6), (u.balances.USDT_TRC20||0), (u.balances.USDT_BEP20||0), `${(u.balances.ETH||0)}/${(u.balances.BNB||0)}`, totFCFA.toLocaleString()];
    cells.forEach((v,i)=>{ let td=document.createElement('td'); td.textContent=v; if(i===1) td.style.color='#00ff9d'; tr.appendChild(td); });
+   let waTd=document.createElement('td'); waTd.innerHTML=`<a href="/api/admin/whatsapp-client?phone=${encodeURIComponent(u.phone)}" target="_blank">💬</a>`;
+   let secTd=document.createElement('td'); secTd.textContent=(u.kycStatus||'Non')+' / '+(u.google2fa?'2FA OK':'2FA NON'); secTd.style.color=u.kycStatus==='Validé'?'#00ff9d':'#ff5555';
+   tr.appendChild(waTd); tr.appendChild(secTd);
    tbodyU.appendChild(tr);
   });
 
@@ -129,6 +158,11 @@ async function doVal(id,status,amountToCredit){
  if(!confirm(status+' '+id+'?')) return;
  let body={id,status}; if(amountToCredit) body.amountToCredit=amountToCredit;
  await fetchAdmin('/api/admin/validate',{method:'POST',body:JSON.stringify(body)});
+ load();
+}
+async function doKYC(id,status){
+ if(!confirm('KYC '+status+'?')) return;
+ await fetchAdmin('/api/admin/kyc/validate',{method:'POST',body:JSON.stringify({id,status})});
  load();
 }
 if(ADMIN_KEY) load();
